@@ -1,28 +1,27 @@
-import { AfterInsert, Entity, Column, PrimaryGeneratedColumn, AfterUpdate, AfterRemove } from "typeorm";
+import { Role } from "src/roles/role.entity";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 
-@Entity()
+@Entity({ name: 'Users' })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    email: string;
+    first_name: string;
 
+    @Column()
+    last_name: string;
+    
     @Column()
     password: string;
 
-    @AfterInsert()
-    logInsert() {
-        console.log('Inserted User with id: ', this.id);
-    }
+    @Column({ unique: true })
+    email: string;
 
-    @AfterUpdate()
-    logUpdate() {
-        console.log('Updated User with id: ', this.id);
-    }
+    @Column({default: false})
+    google_account: boolean;
 
-    @AfterRemove() 
-    logRemove(){
-        console.log('Removed User with id: ', this.id);
-    }
+    @OneToMany(() => Role, (role) => role.user)
+    roles: Role[];
+
 }

@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
-import { query } from 'express';
+import { LoginUserDto } from './dtos/login-user.dto';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -12,20 +12,22 @@ export class UsersController {
     constructor(
         private usersService: UsersService,
         private authService: AuthService
-    ) {}
+    ) { }
 
     @Post('/login')
-    loginUser(@Body() body: CreateUserDto) {
+    async loginUser(@Body() body: LoginUserDto) {
+        console.log(await this.authService.login(body.email, body.password));
+
         return this.authService.login(body.email, body.password);
     }
 
     @Post('/signup')
     createUser(@Body() body: CreateUserDto) {
-        return this.authService.signup(body.email, body.password);
+        return this.authService.signup(body);
     }
-    
+
     @Post('/google')
-    async authGoogle(@Query() query: {code: string; redirect_uri: string} , @Res() res) {
+    async authGoogle(@Query() query: { code: string; redirect_uri: string }, @Res() res) {
         return this.authService.googleLogin(query, res);
     }
 
