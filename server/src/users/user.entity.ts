@@ -1,16 +1,16 @@
-import { Role } from "src/roles/role.entity";
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Role } from "src/users/role.entity";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
 
-@Entity({ name: 'Users' })
+@Entity({ name: 'users' })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    first_name: string;
+    firstName: string;
 
     @Column()
-    last_name: string;
+    lastName: string;
     
     @Column()
     password: string;
@@ -19,9 +19,12 @@ export class User {
     email: string;
 
     @Column({default: false})
-    google_account: boolean;
+    googleAccount: boolean;
 
-    @OneToMany(() => Role, (role) => role.user)
-    roles: Role[];
+    // add clerk role by default
+    @Column({default: 4})
+    roleId: number;
 
+    @ManyToOne(() => Role, (role) => role.id)
+    role: number;
 }

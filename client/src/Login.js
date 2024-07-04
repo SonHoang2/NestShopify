@@ -9,7 +9,6 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    // const [passwordType, setPasswordType] = useState("password");
     const location = useLocation();
     const navigate = useNavigate();
     // google login
@@ -18,13 +17,14 @@ export default function Login() {
             try {
                 const { code } = queryString.parse(location.search);
 
-                const URL = serverURL + `/auth/google?code=${code}&redirect_uri=${baseURL}/auth/google`;
+                const URL = serverURL + `/auth/google?code=${code}&redirectUri=${baseURL}/auth/google`;
                 const response = await fetch(URL, {
                     method: 'POST',
                 });
                 const data = await response.json();
-                console.log(data.data.user);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
+                console.log(data);
+                localStorage.setItem('user', JSON.stringify(data.data));
+                localStorage.setItem('token', JSON.stringify(data.token));
                 navigate("/");
 
             } catch (error) {
@@ -36,41 +36,16 @@ export default function Login() {
     const googleLogin = async () => {
         const queryParams = queryString.stringify({
             client_id: process.env.REACT_APP_CLIENT_ID, // It must correspond to what we declared earlier in the backend
-            scope: "email", // This is the user data you have access to, in our case its just the mail.
+            scope: "email profile", // This is the user data you have access to, in our case its just the mail.
             redirect_uri: baseURL + "/auth/google", // This is the uri that will be redirected to if the user signs into his google account successfully
             // auth_type: "rerequest", // This tells the consent screen to reappear if the user initially entered wrong credentials into the google modal
             display: "popup", //It pops up the consent screen when the anchor tag is clicked
-            response_type: "code" // This tells Google to append code to the response which will be sent to the backend which exchange the code for a token
+            response_type: "code", // This tells Google to append code to the response which will be sent to the backend which exchange the code for a token
+            // prompt: "consent" // This tells google to always show the consent screen
         });
-        console.log("hello");
         const url = `https://accounts.google.com/o/oauth2/v2/auth?${queryParams}`;
+        
         window.location.href = url;
-    }
-    // normal login
-    const handleSubmit = async e => {
-        try {
-            e.preventDefault();
-            const res = await fetch(
-                serverURL + "/auth/login", {
-                method: "POST",
-                body: JSON.stringify({ email, password }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-            )
-            const data = await res.json();
-
-            if (data.status === "fail") {
-                setError(data.message)
-            } else if (data.status === "success") {
-                localStorage.setItem("user", JSON.stringify(data.data.user));
-                localStorage.setItem("token", JSON.stringify(data.token));
-                navigate("/");
-            }
-        } catch (err) {
-            console.log(err);
-        }
     }
 
     useEffect(() => {
@@ -83,7 +58,7 @@ export default function Login() {
     return (
         <div >
             <div className="shadow border px-5 py-4 bg-white rounded w-400">
-                <form onSubmit={handleSubmit}>
+                <form>
                     <p className="text-success pb-4 fs-3 fw-bold text-center">LOGIN TO YOUR ACCOUNT</p>
                     {
                         error &&
