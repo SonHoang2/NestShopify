@@ -4,27 +4,85 @@ import * as bcrypt from 'bcrypt';
 import { JwtPayload, decode } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from "./dtos/create-user.dto";
+import { MailerService } from "@nestjs-modules/mailer";
+import { stat } from "fs";
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private MailerService: MailerService,
     ) { }
 
     signToken(id: number) {
         return this.jwtService.sign({ id });
     }
 
-    generatePassword() {
-        const length = 20;
+    generateRandowString(length: number) {
         const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$';
         return Array.from(crypto.getRandomValues(new Uint32Array(length)))
             .map((x) => characters[x % characters.length])
             .join('');
     }
 
-    async signup(userInfo: CreateUserDto, res: Response) {
+    async verifyToken(token: string, res) {
+        try {
+            // check if token is valid
+            const user = await this.usersService.findToken(token);
+
+            if (!user) {
+                throw new NotFoundException('Token is invalid or has expired');
+            }
+
+            // activate user account
+            await this.usersService.update(user.id, { active: true, token: null, tokenExpires: null });
+
+            res.json({
+                status: 'success',
+                message: 'token verified',
+            });
+        } catch (error) {
+            console.log({ error });
+            return res.json({
+                status: 'error',
+                message: error.message,
+            });
+        }
+
+    }
+
+    async verifyEmail({ email, firstName, lastName }: { email: string, firstName: string, lastName: string }, res) {
+        try {
+            const token = this.generateRandowString(32);
+            // save token to db
+            await this.usersService.saveToken(email, token);
+            // send email
+            await this.MailerService.sendMail({
+                to: email,
+                from: process.env.EMAIL_USERNAME,
+                subject: `Hi ${firstName} ${lastName}, please verify your NestShopify account`,
+                text: `Click the link below to verify your account. If you did not create an account, please ignore this email.`
+                    + `${process.env.SERVER_URL}/api/v1/auth/verify/email/${token}`,
+            })
+
+            return res.json(
+                {
+                    status: 'success',
+                    message: 'Token sent to email!',
+                }
+            );
+
+        } catch (error) {
+            console.log({ error });
+            return res.json({
+                status: 'error',
+                message: error.message,
+            });
+        }
+    }
+
+    async signup(userInfo: CreateUserDto, res) {
         try {
             let { email, password } = userInfo;
             // see if email is in use
@@ -34,16 +92,17 @@ export class AuthService {
             if (users) {
                 throw new BadRequestException('email in use');
             }
+
             // hash the users password
             const saltOrRounds = 10;
             password = await bcrypt.hash(password, saltOrRounds);
 
-            // create a new user and save it
+            // // create a new user and save it
             const newUser = await this.usersService.create({ ...userInfo, password });
 
             const token = this.signToken(newUser.id);
 
-            return (res as any).json({
+            return res.json({
                 status: 'success',
                 token,
                 data: {
@@ -65,7 +124,7 @@ export class AuthService {
 
     }
 
-    async login(email: string, password: string, res: Response) {
+    async login(email: string, password: string, res) {
         try {
             const user = await this.usersService.findEmail(email);
 
@@ -81,7 +140,7 @@ export class AuthService {
 
             const token = this.signToken(user.id);
 
-            return (res as any).json({
+            return res.json({
                 status: 'success',
                 token,
                 data: {
@@ -95,7 +154,7 @@ export class AuthService {
             })
         } catch (error) {
             console.log({ error });
-            return (res as any).json({
+            return res.json({
                 status: 'error',
                 message: error.message,
             });
@@ -144,7 +203,7 @@ export class AuthService {
 
         let user = await this.usersService.findEmail(email);
         if (!user) {
-            let password = this.generatePassword();
+            let password = this.generateRandowString(20);
             password = await bcrypt.hash(password, 10);
             user = await this.usersService.create({ email, firstName: given_name, lastName: family_name, password, googleAccount: true } as CreateUserDto);
         }

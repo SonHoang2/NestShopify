@@ -5,11 +5,12 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Role } from './users/role.entity';
+import { Role } from './roles/role.entity';
 import { Permission } from './users/permission.entity';
 import { Action } from './users/action.entity';
 import { Article } from './users/article.entity';
 import { Comment } from './users/comment.entity';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { Comment } from './users/comment.entity';
             },
         }),
         UsersModule,
+        RolesModule,
     ],
     controllers: [AppController],
     providers: [AppService],

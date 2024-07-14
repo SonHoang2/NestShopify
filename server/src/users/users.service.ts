@@ -1,10 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { Permission } from './permission.entity';
-import { Role } from './role.entity';
 import { Action } from './action.entity';
 
 @Injectable()
@@ -12,7 +11,6 @@ export class UsersService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
         @InjectRepository(Permission) private permissionRepo: Repository<Permission>,
-        @InjectRepository(Role) private roleRepo: Repository<Role>,
         @InjectRepository(Action) private actionRepo: Repository<Action>,
     ) { }
 
@@ -47,86 +45,55 @@ export class UsersService {
         return this.userRepo.remove(user);
     }
 
-    async getPermission(actionName: string, resource: string, roleName: string) {
-        const permission = await this.permissionRepo.createQueryBuilder('permissions')
-            .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
-            .leftJoin('permissions.action', 'actions')
-            .leftJoin('permissions.role', 'roles')
-            .where(
-                'actions.name = :actionName AND roles.name = :roleName AND actions.tableName = :tableName',
-                { actionName, roleName, tableName: resource }
-            )
-            .getRawOne();
-        
-        return permission;
-    }
-
-    async getRole(id: number): Promise<{ name: string; id: number }> {
-        const roles = await this.userRepo.createQueryBuilder('users')
-            .select('name, roles.id')
-            .leftJoin('users.role', 'roles')
-            .where('users.id = :id', { id })
-            .getRawOne();
-
-        return roles;
-    }
-
-    async createRole(role: string) {
-        const existRole = await this.roleRepo.findOneBy({ name: role });
-
-        if (existRole) {
-            throw new ConflictException('role already exist');
-        }
-
-        const newRole = this.roleRepo.create({ name: role });
-
-        return this.roleRepo.save(newRole);
-    }
-
-    async changeRole(userId: number, roleName: string) {
-        console.log(userId, roleName);
-        const user = await this.userRepo.findOneBy({ id: userId });
-
+    async saveToken(email: string, token: string) {
+        const user = await this.userRepo.findOneBy({ email });
         if (!user) {
             throw new NotFoundException('user not found');
         }
 
-        const role = await this.roleRepo.findOneBy({ name: roleName });
+        // token expires in 10 minutes
+        let tokenExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-        if (!role) {
-            throw new NotFoundException('role not found');
-        }
-
-        // change role of user
-        Object.assign(user, { roleId: role.id });
+        Object.assign(user, { token, tokenExpires });
         return this.userRepo.save(user);
     }
 
-    async deleteRole(roleName: string) {
-        const role = await this.roleRepo.findOneBy({ name: roleName });
-        console.log(role);
-        if (!role) {
-            throw new NotFoundException('role not found');
-        }
+    async findToken(token: string) {
+        return this.userRepo.createQueryBuilder('users')
+            .select("*")
+            .where('users.token = :token AND users.tokenExpires > :date', { token, date: new Date() })
+            .getRawOne();
 
-        return this.roleRepo.remove(role);
     }
 
+    // async getPermission(actionName: string, resource: string, roleName: string) {
+    //     const permission = await this.permissionRepo.createQueryBuilder('permissions')
+    //         .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
+    //         .leftJoin('permissions.action', 'actions')
+    //         .leftJoin('permissions.role', 'roles')
+    //         .where(
+    //             'actions.name = :actionName AND roles.name = :roleName AND actions.tableName = :tableName',
+    //             { actionName, roleName, tableName: resource }
+    //         )
+    //         .getRawOne();
 
-    async createAction(userAction: string, subject: string, condition: string) {
-        // if action exist
-        const existAction = await this.actionRepo.findOneBy({ name: userAction, tableName: subject, condition: condition});
-        if (existAction) {
-            return existAction;
-        }
-        
-        // if action not exist then create new one
-        const action = this.actionRepo.create({ name: userAction, tableName: subject, condition: condition });
-        return this.actionRepo.save(action);
-    }
+    //     return permission;
+    // }
 
-    createPermission(actionId: number, roleId: number) {
-        const permission = this.permissionRepo.create({ actionId: actionId, roleId: roleId });
-        return this.permissionRepo.save(permission);
-    }
+    // async createAction(userAction: string, subject: string, condition: string) {
+    //     // if action exist
+    //     const existAction = await this.actionRepo.findOneBy({ name: userAction, tableName: subject, condition: condition });
+    //     if (existAction) {
+    //         return existAction;
+    //     }
+
+    //     // if action not exist then create new one
+    //     const action = this.actionRepo.create({ name: userAction, tableName: subject, condition: condition });
+    //     return this.actionRepo.save(action);
+    // }
+
+    // createPermission(actionId: number, roleId: number) {
+    //     const permission = this.permissionRepo.create({ actionId: actionId, roleId: roleId });
+    //     return this.permissionRepo.save(permission);
+    // }
 }

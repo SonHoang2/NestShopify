@@ -7,10 +7,10 @@ async function bootstrap() {
     app.enableCors();
     app.useGlobalPipes(
         new ValidationPipe({
-        // This will remove any additional properties that are not in the DTO
+            // This will remove any additional properties that are not in the DTO
             whitelist: true,
-    }),
-  )
-await app.listen(5000);
+        }),
+    )
+    await app.listen(5000);
 }
 bootstrap();

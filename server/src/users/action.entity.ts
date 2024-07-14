@@ -21,5 +21,4 @@ export class Action {
 
     @OneToMany(() => Permission, (permission) => permission.action)
     permissions: Permission[];
-
 }      
