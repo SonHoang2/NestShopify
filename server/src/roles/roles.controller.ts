@@ -23,7 +23,7 @@ export class RolesController {
     @Post('/:roleName')
     async createRole(
         @Param('roleName') roleName: string,
-        @Req() req: Request,
+        @Req() req,
         @Res() res: Response
     ) {
         try {
@@ -44,7 +44,6 @@ export class RolesController {
                 data: {
                     role
                 },
-
             });
         } catch (error) {
             console.log({ error });

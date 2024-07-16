@@ -28,7 +28,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
             useFactory: () => ({
                 transport: {
                     host: process.env.EMAIL_HOST,
-                    port: 587,
+                    port: Number(process.env.EMAIL_PORT),
                     secure: false, // upgrade later with STARTTLS
                     auth: {
                         user: process.env.EMAIL_USERNAME,

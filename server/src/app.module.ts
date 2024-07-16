@@ -11,6 +11,11 @@ import { Action } from './users/action.entity';
 import { Article } from './users/article.entity';
 import { Comment } from './users/comment.entity';
 import { RolesModule } from './roles/roles.module';
+import { CategoriesModule } from './categories/categories.module';
+import { CategoryImage } from './categories/categoryImage.entity';
+import { Category } from './categories/category.entity';
+import { ItemsModule } from './items/items.module';
+import { Item } from './items/item.entity';
 
 @Module({
     imports: [
@@ -28,13 +33,18 @@ import { RolesModule } from './roles/roles.module';
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE'),
-                    entities: [User, Role, Permission, Action, Article, Comment],
+                    entities: [
+                        User, Role, Permission, Action, Article, 
+                        Comment, Category, CategoryImage, Item
+                    ],
                     synchronize: true, // only run in development
                 }
             },
         }),
         UsersModule,
         RolesModule,
+        CategoriesModule,
+        ItemsModule,
     ],
     controllers: [AppController],
     providers: [AppService],

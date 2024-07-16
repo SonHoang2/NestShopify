@@ -52,18 +52,24 @@ export class AuthService {
 
     }
 
-    async verifyEmail({ email, firstName, lastName }: { email: string, firstName: string, lastName: string }, res) {
+    async verifyEmail({ email }: { email: string }, res) {
         try {
             const token = this.generateRandowString(32);
             // save token to db
-            await this.usersService.saveToken(email, token);
+            const user = await this.usersService.saveToken(email, token);
+
             // send email
             await this.MailerService.sendMail({
-                to: email,
                 from: process.env.EMAIL_USERNAME,
-                subject: `Hi ${firstName} ${lastName}, please verify your NestShopify account`,
-                text: `Click the link below to verify your account. If you did not create an account, please ignore this email.`
-                    + `${process.env.SERVER_URL}/api/v1/auth/verify/email/${token}`,
+                to: email,
+                subject: `Hi ${user.firstName} ${user.lastName}, please verify your NestShopify account`,
+                html: `
+                    <div>
+                        <h4>Hi ${user.firstName} ${user.lastName},</h4>
+                        <p>Click the link below to verify your account. If you did not create an account, please ignore this email.</p>
+                        <a href="${process.env.SERVER_URL}/api/v1/auth/verify/email/${token}">Verify Account</a>
+                    </div>
+                `,
             })
 
             return res.json(

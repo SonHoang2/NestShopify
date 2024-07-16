@@ -26,11 +26,11 @@ export class UsersController {
     }
 
     @Post('/auth/verify/email')
-    async verifyEmail(@Body() Body: { email: string, firstName: string, lastName: string }, @Res() res: Response) {
+    async verifyEmail(@Body() Body: { email: string }, @Res() res: Response) {
         return this.authService.verifyEmail(Body, res);
     }
 
-    @Post('/auth/verify/email/:token')
+    @Get('/auth/verify/email/:token')
     async verifyToken(@Param('token') token : string, @Res() res: Response) {
         return this.authService.verifyToken(token, res);
     }
