@@ -1,39 +1,38 @@
-import { Optional } from "@nestjs/common";
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class updateItemDto {
     @IsString()
     name: string;
 
-    @Optional()
+    @IsOptional()
     @IsString()
     barcode: string;
 
-    @Optional()
+    @IsOptional()
     @IsNumber()
     purchasePrice: number;
     
-    @Optional()
+    @IsOptional()
     @IsNumber()
     salePrice: number;
 
-    @Optional()
+    @IsOptional()
     @IsNumber()
     weight: number;
 
-    @Optional()
+    @IsOptional()
     @IsString()
     thumbnailImage: string;
 
-    @Optional()
+    @IsOptional()
     @IsString()
     description: string;
 
-    @Optional()
+    @IsOptional()
     @IsNumber()
     quantity: number;
 
-    @Optional()
+    @IsOptional()
     @IsNumber()
     categoryId: number;
 }
