@@ -9,7 +9,7 @@ export class ItemsService {
         @InjectRepository(Item) private itemRepo: Repository<Item>,
     ) { }
 
-    async createItem(item) {
+    async create(item) {
         const newItem = this.itemRepo.create(item);
         return this.itemRepo.save(newItem);
     }
@@ -31,5 +31,12 @@ export class ItemsService {
 
         Object.assign(item, attrs);
         return this.itemRepo.save(item);
+    }
+
+    async getItemsByCategory(categoryId: number) {
+        return this.itemRepo.createQueryBuilder('item')
+            .select('*')
+            .where('item.categoryId = :categoryId', { categoryId })
+            .getRawMany();
     }
 }

@@ -12,10 +12,18 @@ import { Article } from './users/article.entity';
 import { Comment } from './users/comment.entity';
 import { RolesModule } from './roles/roles.module';
 import { CategoriesModule } from './categories/categories.module';
-import { CategoryImage } from './categories/categoryImage.entity';
+import { CategoryImage } from './categories/category-image.entity';
 import { Category } from './categories/category.entity';
 import { ItemsModule } from './items/items.module';
 import { Item } from './items/item.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/order.entity';
+import { OrderItems } from './orders/order-item.entity';
+import { VouchersModule } from './vouchers/vouchers.module';
+import { Voucher } from './vouchers/voucher.entity';
+import { FlashSalesModule } from './flash-sales/flash-sales.module';
+import { FlashSaleItem } from './flash-sales/flash-sale-item.entity';
+import { FlashSale } from './flash-sales/flash-sale.entity';
 
 @Module({
     imports: [
@@ -35,7 +43,9 @@ import { Item } from './items/item.entity';
                     database: configService.get('DB_DATABASE'),
                     entities: [
                         User, Role, Permission, Action, Article, 
-                        Comment, Category, CategoryImage, Item
+                        Comment, Category, CategoryImage, Item,
+                        Order, OrderItems, Voucher, FlashSaleItem,
+                        FlashSale
                     ],
                     synchronize: true, // only run in development
                 }
@@ -45,6 +55,9 @@ import { Item } from './items/item.entity';
         RolesModule,
         CategoriesModule,
         ItemsModule,
+        OrdersModule,
+        VouchersModule,
+        FlashSalesModule,
     ],
     controllers: [AppController],
     providers: [AppService],

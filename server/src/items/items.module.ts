@@ -11,6 +11,7 @@ import { Item } from './item.entity';
         forwardRef(() => CategoriesModule), 
     ],
     controllers: [ItemsController],
-    providers: [ItemsService]
+    providers: [ItemsService],
+    exports: [ItemsService],
 })
 export class ItemsModule { }

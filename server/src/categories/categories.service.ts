@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Category } from './category.entity';
-import { CategoryImage } from './categoryImage.entity';
+import { CategoryImage } from './category-image.entity';
 const imgbbUploader = require("imgbb-uploader");
 
 @Injectable()

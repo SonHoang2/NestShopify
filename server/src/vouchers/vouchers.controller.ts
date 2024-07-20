@@ -1,118 +1,118 @@
-import { Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
-import { CreateItemDto } from './dtos/create-item.dto';
-import { ItemsService } from './items.service';
-import { updateItemDto } from './dtos/update-item.dto';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import { VouchersService } from './vouchers.service';
+import { CreateVoucherDto } from './dtos/create-voucher.dto';
+import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 
-@Controller('/api/v1/items')
-export class ItemsController {
+@Controller('/api/v1/vouchers')
+export class VouchersController {
     constructor(
-        private itemsService: ItemsService
+        private vouchersService: VouchersService,
     ) { }
 
-    @Get()
+    @Get('/')
     async getAll(
-        @Res() res
+        @Res() res,
     ) {
         try {
-            const items = await this.itemsService.getAll();
+            const vouchers = await this.vouchersService.getAll();
 
-            return res.json({
+            res.json({
                 status: 'success',
                 data: {
-                    items
+                    vouchers
                 },
             });
         } catch (error) {
-            return res.json({
+            res.json({
                 status: 'error',
                 message: error.message,
             });
         }
     }
 
-    @Get(':id')
+    @Get('/:id')
     async getOne(
         @Res() res,
-        @Param('id') id: number
+        @Param('id') id: number,
     ) {
         try {
-            const item = await this.itemsService.getOne(id);
+            const voucher = await this.vouchersService.getOne(id);
 
-            return res.json({
+            res.json({
                 status: 'success',
                 data: {
-                    item
+                    voucher
                 },
             });
         } catch (error) {
-            return res.json({
+            res.json({
                 status: 'error',
                 message: error.message,
             });
         }
     }
 
-    @Post()
+    @Post('/')
     async create(
         @Res() res,
-        @Body() body: CreateItemDto
+        @Body() body: CreateVoucherDto,
     ) {
         try {
-            const item = await this.itemsService.create(body);
+            const voucher = await this.vouchersService.create(body);
 
-            return res.json({
+            res.json({
                 status: 'success',
                 data: {
-                    item
+                    voucher
                 },
             });
         } catch (error) {
-            return res.json({
+            res.json({
                 status: 'error',
                 message: error.message,
             });
         }
     }
 
-    @Patch(':id')
+    @Patch('/:id')
     async update(
         @Res() res,
         @Param('id') id: number,
-        @Body() body: updateItemDto
+        @Body() body: UpdateVoucherDto,
     ) {
         try {
-            const item = await this.itemsService.update(id, body);
+            const voucher = await this.vouchersService.update(id, body);
 
-            return res.json({
+            res.json({
                 status: 'success',
                 data: {
-                    item
+                    voucher
                 },
             });
         } catch (error) {
-            return res.json({
+            res.json({
                 status: 'error',
                 message: error.message,
             });
         }
     }
 
-    @Get('/category/:id')
-    async getItemsByCategory(
+    @Delete('/:id')
+    async delete(
         @Res() res,
-        @Param('id') id: number
+        @Param('id') id: number,
     ) {
         try {
-            const items = await this.itemsService.getItemsByCategory(id);
+            const voucher = await this.vouchersService.delete(id);
 
-            return res.json({
+            res.json({
                 status: 'success',
                 data: {
-                    items
+                    voucher
                 },
             });
         } catch (error) {
-            return res.json({
+            res.json({
                 status: 'error',
                 message: error.message,
             });
