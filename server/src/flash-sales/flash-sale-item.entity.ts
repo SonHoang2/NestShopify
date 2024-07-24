@@ -1,5 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Item } from "src/items/item.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { FlashSale } from "./flash-sale.entity";
 
+@Unique(['itemId', 'flashSaleId'])
 @Entity("flash_sale_items")
 export class FlashSaleItem {
     @PrimaryGeneratedColumn()
@@ -16,4 +19,10 @@ export class FlashSaleItem {
 
     @Column()
     quantity: number;
+
+    @ManyToOne(() => Item, item => item.id)
+    item: Item;
+
+    @ManyToOne(() => FlashSale, flashSale => flashSale.id)
+    flashSale: FlashSale;
 }

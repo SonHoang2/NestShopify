@@ -1,5 +1,8 @@
 import { Category } from "src/categories/category.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, Or, PrimaryGeneratedColumn } from "typeorm";
+import { ItemImage } from "./item-image.entity";
+import { OrderItem } from "src/orders/order-item.entity";
+import { FlashSaleItem } from "src/flash-sales/flash-sale-item.entity";
 
 @Entity("items")
 export class Item {
@@ -30,6 +33,16 @@ export class Item {
     @Column()
     quantity: number;
 
+    @OneToMany(() => ItemImage, itemImage => itemImage.item)
+    itemImages: ItemImage[];
+
+    @OneToMany(() => OrderItem, orderItem => orderItem.item)
+    orderItems: OrderItem[];
+
+    @OneToMany(() => FlashSaleItem, flashSaleItem => flashSaleItem.item)
+    flashSaleItems: FlashSaleItem[];
+
     @ManyToOne(() => Category, category => category.id)
     category: Category;
+
 }

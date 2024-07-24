@@ -4,11 +4,14 @@ import { ItemsService } from './items.service';
 import { CategoriesModule } from 'src/categories/categories.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Item } from './item.entity';
+import { ItemImage } from './item-image.entity';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Item]),
+        TypeOrmModule.forFeature([Item, ItemImage]),
         forwardRef(() => CategoriesModule), 
+        CommonModule
     ],
     controllers: [ItemsController],
     providers: [ItemsService],

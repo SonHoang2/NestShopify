@@ -1,6 +1,7 @@
-import { User } from "src/users/user.entity";
+
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { OrderItems } from "./order-item.entity";
+import { OrderItem } from "./order-item.entity";
+import { User } from "src/users/user.entity";
 
 @Unique(['userId', 'createdAt'])
 @Entity("orders")
@@ -20,8 +21,8 @@ export class Order {
     @Column()
     userId: number;
 
-    @OneToMany(() => OrderItems, orderItems => orderItems.order)
-    orderItems: OrderItems[];
+    @OneToMany(() => OrderItem, orderItem => orderItem.order)
+    orderItems: OrderItem[];
 
     @ManyToOne(() => User, user => user.id)
     user: User;

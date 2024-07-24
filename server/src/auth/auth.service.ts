@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { UsersService } from "./users.service";
+
 import * as bcrypt from 'bcrypt';
 import { JwtPayload, decode } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from "./dtos/create-user.dto";
+
 import { MailerService } from "@nestjs-modules/mailer";
-import { stat } from "fs";
+import { UsersService } from "src/users/users.service";
+import { CreateUserDto } from "src/users/dtos/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,7 @@ export class AuthService {
             .join('');
     }
 
-    async verifyToken(token: string, res) {
+    async verifyEmail(token: string, res) {
         try {
             // check if token is valid
             const user = await this.usersService.findToken(token);
@@ -35,8 +36,7 @@ export class AuthService {
                 throw new NotFoundException('Token is invalid or has expired');
             }
 
-            // activate user account
-            await this.usersService.update(user.id, { active: true, token: null, tokenExpires: null });
+            await this.usersService.update(user.id, { emailVerified: true, token: null, tokenExpires: null });
 
             res.json({
                 status: 'success',
@@ -52,7 +52,7 @@ export class AuthService {
 
     }
 
-    async verifyEmail({ email }: { email: string }, res) {
+    async emailRegister({ email }: { email: string }, res) {
         try {
             const token = this.generateRandowString(32);
             // save token to db
@@ -93,7 +93,7 @@ export class AuthService {
             let { email, password } = userInfo;
             // see if email is in use
             const users = await this.usersService.findEmail(email);
-            console.log(users);
+            console.log({ users });
 
             if (users) {
                 throw new BadRequestException('email in use');
@@ -108,21 +108,20 @@ export class AuthService {
 
             const token = this.signToken(newUser.id);
 
+            // remove password and token from response
+            delete newUser.password;
+            delete newUser.token;
+
             return res.json({
                 status: 'success',
                 token,
                 data: {
-                    user: {
-                        id: newUser.id,
-                        email: newUser.email,
-                        firstName: newUser.firstName,
-                        lastName: newUser.lastName,
-                    }
+                    newUser
                 }
             })
         } catch (error) {
             console.log({ error });
-            return (res as any).json({
+            return res.json({
                 status: 'error',
                 message: error.message,
             });
@@ -146,16 +145,15 @@ export class AuthService {
 
             const token = this.signToken(user.id);
 
+            // remove password and token from response
+            delete user.password;
+            delete user.token;
+
             return res.json({
                 status: 'success',
                 token,
                 data: {
-                    user: {
-                        id: user.id,
-                        email: user.email,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                    }
+                    user
                 }
             })
         } catch (error) {

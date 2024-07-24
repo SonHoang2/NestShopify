@@ -35,6 +35,9 @@ export class User {
     tokenExpires: Date;
 
     @Column({ default: false })
+    emailVerified: boolean;
+
+    @Column({ default: true })
     active: boolean;
 
     // add clerk role by default

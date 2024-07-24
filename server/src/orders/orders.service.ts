@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OrderItems } from './order-item.entity';
+import { OrderItem } from './order-item.entity';
 import { Item } from 'src/items/item.entity';
 
 @Injectable()
 export class OrdersService {
     constructor(
         @InjectRepository(Order) private orderRepo: Repository<Order>,
-        @InjectRepository(OrderItems) private OrderItemsRepo: Repository<OrderItems>,
+        @InjectRepository(OrderItem) private OrderItemRepo: Repository<OrderItem>,
         @InjectRepository(Item) private itemRepo: Repository<Item>,
     ) { }
 
@@ -50,7 +50,7 @@ export class OrdersService {
     }
 
     async createCartItem({ orderId, itemId, quantity }: { orderId: number; itemId: number; quantity: number }) {
-        const CartItem = this.OrderItemsRepo.create({ orderId, itemId, quantity });
+        const CartItem = this.OrderItemRepo.create({ orderId, itemId, quantity });
 
         const item = await this.itemRepo.createQueryBuilder('items')
             .select('salePrice as price, quantity')
@@ -64,7 +64,7 @@ export class OrdersService {
         const totalAmount = item.price * quantity;
         Object.assign(CartItem, { totalAmount });
 
-        const orderItem = await this.OrderItemsRepo.save(CartItem);
+        const orderItem = await this.OrderItemRepo.save(CartItem);
 
         // Update total amount in order
         this.sumCart(orderId)
@@ -73,7 +73,7 @@ export class OrdersService {
     }
 
     async updateCartItem(id: number, quantity: number) {
-        const orderItem = await this.OrderItemsRepo.findOneBy({ id });
+        const orderItem = await this.OrderItemRepo.findOneBy({ id });
 
         if (!orderItem) {
             throw new Error('Order item not found');
@@ -92,7 +92,7 @@ export class OrdersService {
 
         Object.assign(orderItem, { quantity, totalAmount });
 
-        const newOrderItem = await this.OrderItemsRepo.save(orderItem)
+        const newOrderItem = await this.OrderItemRepo.save(orderItem)
 
         // Update total amount in order
         this.sumCart(orderItem.orderId);
@@ -101,13 +101,13 @@ export class OrdersService {
     }
 
     async deleteCartItem(id: number) {
-        const orderItem = await this.OrderItemsRepo.findOneBy({ id });
+        const orderItem = await this.OrderItemRepo.findOneBy({ id });
 
         if (!orderItem) {
             throw new Error('Order item not found');
         }
 
-        const newOrderItem = await this.OrderItemsRepo.remove(orderItem);
+        const newOrderItem = await this.OrderItemRepo.remove(orderItem);
 
         // Update total amount in order
         this.sumCart(orderItem.orderId);
@@ -116,7 +116,7 @@ export class OrdersService {
     }
 
     async getCartItems(orderId: number) {
-        return await this.OrderItemsRepo.createQueryBuilder('order_items')
+        return await this.OrderItemRepo.createQueryBuilder('order_items')
             .select(' order_items.id, name, order_items.quantity, totalAmount, salePrice as price, order_items.itemId')
             .leftJoin("order_items.item", "item")
             .where('order_items.orderId = :orderId', { orderId })
@@ -124,7 +124,7 @@ export class OrdersService {
     }
 
     async sumCart(orderId: number) {
-        const total = await this.OrderItemsRepo.createQueryBuilder('order_items')
+        const total = await this.OrderItemRepo.createQueryBuilder('order_items')
             .select('SUM(totalAmount) as total')
             .where('order_items.orderId = :orderId', { orderId })
             .getRawOne();
@@ -133,7 +133,7 @@ export class OrdersService {
     }
 
     async createCheckout(userId: number) {
-        const order = await this.OrderItemsRepo.createQueryBuilder('order_items')
+        const order = await this.OrderItemRepo.createQueryBuilder('order_items')
             .select('items.id as itemId, order_items.quantity, items.quantity as stock')
             .leftJoin("order_items.order", "orders")
             .leftJoin('orders.user', 'users')

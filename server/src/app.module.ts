@@ -6,9 +6,8 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Role } from './roles/role.entity';
-import { Permission } from './users/permission.entity';
-import { Action } from './users/action.entity';
-import { Article } from './users/article.entity';
+import { Permission } from './permissions/permission.entity';
+
 import { Comment } from './users/comment.entity';
 import { RolesModule } from './roles/roles.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -18,12 +17,20 @@ import { ItemsModule } from './items/items.module';
 import { Item } from './items/item.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/order.entity';
-import { OrderItems } from './orders/order-item.entity';
-import { VouchersModule } from './vouchers/vouchers.module';
-import { Voucher } from './vouchers/voucher.entity';
+import { OrderItem } from './orders/order-item.entity';
+
 import { FlashSalesModule } from './flash-sales/flash-sales.module';
 import { FlashSaleItem } from './flash-sales/flash-sale-item.entity';
 import { FlashSale } from './flash-sales/flash-sale.entity';
+import { ItemImage } from './items/item-image.entity';
+import { Action } from './actions/action.entity';
+import { Article } from './users/article.entity';
+import { CommonModule } from './common/common.module';
+import { AuthModule } from './auth/auth.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { ActionsModule } from './actions/actions.module';
+import { Voucher } from './vouchers/voucher.entity';
+import { VouchersModule } from './vouchers/vouchers.module';
 
 @Module({
     imports: [
@@ -44,8 +51,9 @@ import { FlashSale } from './flash-sales/flash-sale.entity';
                     entities: [
                         User, Role, Permission, Action, Article, 
                         Comment, Category, CategoryImage, Item,
-                        Order, OrderItems, Voucher, FlashSaleItem,
-                        FlashSale
+                        ItemImage, Order, OrderItem, Voucher, 
+                        FlashSaleItem, FlashSale, Permission,
+                        Action
                     ],
                     synchronize: true, // only run in development
                 }
@@ -58,6 +66,10 @@ import { FlashSale } from './flash-sales/flash-sale.entity';
         OrdersModule,
         VouchersModule,
         FlashSalesModule,
+        CommonModule,
+        AuthModule,
+        PermissionsModule,
+        ActionsModule,
     ],
     controllers: [AppController],
     providers: [AppService],

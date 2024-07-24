@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { Permission } from "./permission.entity";
+import { Permission } from "../permissions/permission.entity";
 
 @Unique(['name', 'tableName', 'condition'])
 @Entity({ name: 'actions' })
@@ -13,7 +13,7 @@ export class Action {
     // @Column()
     // field: Array;
     
-    @Column({default: null})
+    @Column({default: ""})
     condition: string;
 
     @Column()

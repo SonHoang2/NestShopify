@@ -4,8 +4,8 @@ import { RolesService } from './roles.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from './role.entity';
 import { UsersModule } from 'src/users/users.module';
-import { User } from 'src/users/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { User } from 'src/users/user.entity';
 
 @Module({
     imports: [

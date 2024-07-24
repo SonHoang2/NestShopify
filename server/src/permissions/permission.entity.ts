@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Role } from "../roles/role.entity";
-import { Action } from "./action.entity";
+import { Action } from "../actions/action.entity";
 
 @Unique(['roleId', 'actionId'])
 @Entity({ name: 'permissions' })

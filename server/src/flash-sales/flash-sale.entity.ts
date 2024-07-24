@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { FlashSaleItem } from "./flash-sale-item.entity";
 
 @Entity("flash_sales")
 export class FlashSale {
@@ -11,6 +12,9 @@ export class FlashSale {
     @Column()
     endTime: Date;
 
-    @Column()
+    @Column({ unique: true })
     description: string;
+
+    @OneToMany(() => FlashSaleItem, flashSaleItem => flashSaleItem.flashSale)
+    flashSaleItems: FlashSaleItem[];
 }

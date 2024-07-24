@@ -1,6 +1,9 @@
-import { Controller, Delete, ForbiddenException, Param, Patch, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateRoleDto } from './dtos/update-role.dto';
+import { Request } from 'express';
+import { HttpStatus } from '@nestjs/common';
 
 @Controller('/api/v1/roles')
 export class RolesController {
@@ -9,25 +12,45 @@ export class RolesController {
         private jwtService: JwtService,
     ) { }
 
-    async getRole(@Req() req: Request) {
-        // take token from header and decode it
-        const Token = req.headers['authorization'].split(' ')[1];
-        const userId = this.jwtService.decode(Token).id;
 
-        // get roles of user    
-        const role = await this.rolesService.getRole(userId);
-        console.log(role);
-        return role;
-    }
-
-    @Post('/:roleName')
-    async createRole(
-        @Param('roleName') roleName: string,
-        @Req() req,
-        @Res() res: Response
+    @Get()
+    async getRoles(
+        @Res() res,
+        @Req() req: Request
     ) {
         try {
-            const userRole = await this.getRole(req);
+            const { userId, role: userRole } = await this.rolesService.getRoleAndUserId(req);
+            console.log({ userRole, userId });
+
+            // check permission of user
+            if (userRole.name !== "admin") {
+                throw new ForbiddenException('The role does not have permission to read on role');
+            }
+
+            const roles = await this.rolesService.getRoles();
+            return res.status(HttpStatus.OK).json({
+                status: 'success',
+                data: {
+                    roles
+                },
+            });
+        } catch (error) {
+            console.log({ error });
+            return res.status(HttpStatus.UNAUTHORIZED).json({
+                status: 'error',
+                message: error.message,
+            });
+        }
+    }
+
+    @Post()
+    async createRole(
+        @Req() req,
+        @Res() res,
+        @Body('roleName') roleName: string
+    ) {
+        try {
+            const { userId, role: userRole } = await this.rolesService.getRoleAndUserId(req);
             console.log(userRole);
 
             // check permission of user
@@ -39,7 +62,7 @@ export class RolesController {
             const role = await this.rolesService.createRole(roleName);
             console.log({ userRole }, { role });
 
-            return (res as any).json({
+            return res.json({
                 status: 'success',
                 data: {
                     role
@@ -47,21 +70,21 @@ export class RolesController {
             });
         } catch (error) {
             console.log({ error });
-            return (res as any).json({
+            return res.json({
                 status: 'error',
                 message: error.message,
             });
         }
     }
 
-    @Patch('/:roleName/users/:userId')
+    @Patch('/users/')
     async changeUserRole(
-        @Param() { userId, roleName }: { userId: string; roleName: string },
-        @Res() res: Response,
-        @Req() req: Request
+        @Res() res,
+        @Req() req: Request,
+        @Body() body: UpdateRoleDto,
     ) {
         try {
-            const userRole = await this.getRole(req);
+            const { userId, role: userRole } = await this.rolesService.getRoleAndUserId(req);
             console.log(userRole);
 
             // check permission of user
@@ -69,9 +92,9 @@ export class RolesController {
                 throw new ForbiddenException('The role does not have permission to change user role');
             }
 
-            const user = await this.rolesService.changeRole(parseInt(userId), roleName);
+            const user = await this.rolesService.changeRole(body);
 
-            return (res as any).json({
+            return res.json({
                 status: 'success',
                 data: {
                     userId: user.id,
@@ -83,7 +106,7 @@ export class RolesController {
             });
         } catch (error) {
             console.log({ error });
-            return (res as any).json({
+            return res.json({
                 status: 'error',
                 message: error.message,
             });
@@ -94,11 +117,11 @@ export class RolesController {
     @Delete('/:roleName')
     async deleteRole(
         @Param('roleName') roleName: string,
-        @Res() res: Response,
+        @Res() res,
         @Req() req: Request
     ) {
         try {
-            const userRole = await this.getRole(req);
+            const { userId, role: userRole } = await this.rolesService.getRoleAndUserId(req);
             console.log(userRole);
 
             // check permission of user
@@ -108,7 +131,7 @@ export class RolesController {
 
             const role = await this.rolesService.deleteRole(roleName);
 
-            return (res as any).json({
+            return res.json({
                 status: 'success',
                 data: {
                     role
@@ -116,7 +139,7 @@ export class RolesController {
             });
         } catch (error) {
             console.log({ error });
-            return (res as any).json({
+            return res.json({
                 status: 'error',
                 message: error.message,
             });
@@ -130,7 +153,7 @@ export class RolesController {
     //     @Req() req: Request
     // ) {
     //     try {
-    //         const userRole = await this.getRole(req);
+    //         const { userId, role: userRole } = await this.rolesService.getRoleAndUserId(req););
     //         console.log(userRole);
 
     //         // check permission of user

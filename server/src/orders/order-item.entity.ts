@@ -4,7 +4,7 @@ import { Item } from "src/items/item.entity";
 
 @Unique(['orderId', 'itemId'])
 @Entity("order_items")
-export class OrderItems {
+export class OrderItem {
     @PrimaryGeneratedColumn()
     id: number;
     
