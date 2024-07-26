@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FlashSale } from './flash-sale.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { FlashSaleItem } from './flash-sale-item.entity';
 import { CreateFlashSaleDto } from './dtos/create-flash-sale.dto';
 import { CreateFlashSaleItemDto } from './dtos/create-flash-sale-item.dto';
@@ -26,6 +26,7 @@ export class FlashSalesService {
         if (!flashSale) {
             throw new Error('Flash sale not found');
         }
+
         return flashSale;
     }
 
@@ -53,7 +54,7 @@ export class FlashSalesService {
         }
 
         return this.flashSaleRepository.remove(flashSale);
-    }   
+    }
 
     async createFlashSaleItem(attrs: CreateFlashSaleItemDto) {
         const flashSaleItem = this.flashSaleItemRepository.create(attrs);
@@ -77,11 +78,11 @@ export class FlashSalesService {
     async updateFlashSaleItem(flashSaleItem: FlashSaleItem, attrs: UpdateFlashSaleItemDto) {
         Object.assign(flashSaleItem, attrs);
         console.log(flashSaleItem);
-        
+
         return this.flashSaleItemRepository.save(flashSaleItem);
     }
 
-    async deleteFlashSaleItem (id: number) {
+    async deleteFlashSaleItem(id: number) {
         const flashSaleItem = await this.flashSaleItemRepository.findOneBy({ id });
 
         if (!flashSaleItem) {
@@ -89,5 +90,18 @@ export class FlashSalesService {
         }
 
         return this.flashSaleItemRepository.remove(flashSaleItem);
+    }
+
+    async getUpcomingFlashSale() {
+        const now = new Date();
+
+        const upcomingTime = new Date(now.getTime() + 15 * 60000);
+
+        const flashSale = await this.flashSaleRepository.createQueryBuilder('flashSale')
+            .select('*')
+            .where('startTime BETWEEN :now AND :upcomingTime', { now, upcomingTime })
+            .getRawOne();
+
+        return flashSale;
     }
 }

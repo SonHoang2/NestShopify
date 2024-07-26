@@ -12,6 +12,7 @@ import { ItemsModule } from 'src/items/items.module';
         ItemsModule
     ],
     controllers: [FlashSalesController],
-    providers: [FlashSalesService]
+    providers: [FlashSalesService],
+    exports: [FlashSalesService]
 })
 export class FlashSalesModule { }

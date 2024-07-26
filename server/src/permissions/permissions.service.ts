@@ -38,6 +38,8 @@ export class PermissionsService {
     }
 
     async checkPermission(role: string, action: string, subject: string) {
+
+
         let permission = await this.permissionRepo.createQueryBuilder('permissions')
             .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
             .leftJoin('permissions.action', 'actions')
@@ -47,9 +49,9 @@ export class PermissionsService {
                 { role, action, subject }
             )
             .getRawOne();
-
-        console.log(permission);
-
+            
+        // console.log({ permission });
+         
         return permission;
     }
 

@@ -22,20 +22,43 @@ export class UsersService {
         return this.userRepo.save(user);
     }
 
-    async findAll({ fields, offset, limit, sort } : { fields: [], offset: number, limit: number, sort: {} }) {
+    async findAll({ fields, offset, limit, sort }: { fields: [], offset: number, limit: number, sort: {} }) {
         const users = await this.userRepo.find({
             select: fields,
             skip: offset,
             take: limit,
-            order: sort
+            order: sort,
         });
-        
+
         users.forEach(user => {
             this.sanitizeUser(user);
         });
 
         return users;
     }
+
+    // allow pass parameter or not
+    async findAllActiveUser({
+        fields = [],
+        offset = 0,
+        limit = 10,
+        sort = {}
+    }) {
+        const users = await this.userRepo.find({
+            select: fields,
+            skip: offset,
+            take: limit,
+            order: sort,
+            where: { active: true }
+        });
+
+        users.forEach(user => {
+            this.sanitizeUser(user);
+        });
+
+        return users;
+    }
+
 
     async findId(id: number) {
         const user = await this.userRepo.findOneBy({ id })
@@ -59,9 +82,9 @@ export class UsersService {
             throw new NotFoundException('user not found');
         }
         Object.assign(user, attrs);
-        
+
         const newUser = await this.userRepo.save(user);
-    
+
         return this.sanitizeUser(newUser);
     }
 
@@ -72,8 +95,9 @@ export class UsersService {
             throw new NotFoundException('user not found');
         }
         Object.assign(user, { active: false });
+        const UpdateUser = await this.userRepo.save(user);
 
-        return this.sanitizeUser(user);
+        return this.sanitizeUser(UpdateUser);
     }
 
     async saveToken(email: string, token: string) {

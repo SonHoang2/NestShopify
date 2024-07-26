@@ -183,7 +183,9 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    flashSale
+                    ...flashSale,
+                    startTime: flashSale.startTime.toString(),
+                    endTime: flashSale.endTime.toString()
                 },
             });
         } catch (error) {
@@ -201,11 +203,13 @@ export class FlashSalesController {
     ) {
         try {
             const flashSale = await this.flashSalesService.getFlashSale(id);
-
+            
             return res.json({
                 status: 'success',
                 data: {
-                    flashSale
+                    ...flashSale,
+                    startTime: flashSale.startTime.toString(),
+                    endTime: flashSale.endTime.toString()
                 },
             });
         } catch (error) {
@@ -222,11 +226,17 @@ export class FlashSalesController {
     ) {
         try {
             const flashSales = await this.flashSalesService.getAllFlashSales();
+            // convert time UTC to vietnam
+            const convertTime = flashSales.map(flashSale => ({
+                ...flashSale,
+                startTime : flashSale.startTime.toString(),
+                endTime : flashSale.endTime.toString(),
+            }));
 
             return res.json({
                 status: 'success',
                 data: {
-                    flashSales
+                    flashSales: convertTime
                 },
             });
         } catch (error) {
@@ -244,14 +254,14 @@ export class FlashSalesController {
         @Body() body: UpdateFlashSaleDto
     ) {
         try {
-            console.log(body);
-
             const flashSale = await this.flashSalesService.updateFlashSale(id, body);
 
             return res.json({
                 status: 'success',
                 data: {
-                    flashSale
+                    ...flashSale,
+                    startTime: flashSale.startTime.toString(),
+                    endTime: flashSale.endTime.toString()
                 },
             });
         } catch (error) {
@@ -273,7 +283,9 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    flashSale
+                    ...flashSale,
+                    startTime: flashSale.startTime.toString(),
+                    endTime: flashSale.endTime.toString()
                 },
             });
         } catch (error) {

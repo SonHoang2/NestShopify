@@ -5,6 +5,7 @@ import { QueryDto } from 'src/common/dtos/query.dto';
 import { ShareService } from 'src/common/share/share.service';
 import { PermissionsService } from 'src/permissions/permissions.service';
 import { RolesService } from 'src/roles/roles.service';
+import { Action, Subject } from '../common/variable';
 
 @Controller('/api/v1/users')
 export class UsersController {
@@ -15,8 +16,46 @@ export class UsersController {
         private roleService: RolesService
     ) { }
 
+    @Get('/active')
+    async getAllActiveUser(
+        @Req() req,
+        @Res() res,
+        @Query() query: QueryDto
+    ) {
+        try {
+            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
+
+            // if permission passed, check condition
+            // if condition is author, check if the user is the author
+            console.log({ permission });
+
+            if (permission.condition === "author") {
+                throw new Error('Permission denied');
+            }
+
+            const newQuery = this.shareService.APIFeatures(query);
+
+            const users = await this.usersService.findAllActiveUser(newQuery);
+            return res.json({
+                status: "success",
+                data: {
+                    users
+                }
+            });
+        } catch (error) {
+            return res.status(400).json({
+                status: "error",
+                message: error.message
+            });
+
+        }
+    }
+
     @Get('/:id')
-    async getUser(
+    async getOne(
         @Res() res,
         @Req() req,
         @Param('id') id: number
@@ -25,10 +64,11 @@ export class UsersController {
             const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
 
             // check permission for role
-            const permission = await this.permissionsService.checkPermission(userRole.name, "read", "users");
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
 
             // if permission passed, check condition
             // if condition is author, check if the user is the author
+            console.log({ permission });
 
             if (permission.condition === "author" && userId != id) {
                 throw new Error('Permission denied');
@@ -50,28 +90,70 @@ export class UsersController {
     }
 
     @Get()
-    async getUsers(
+    async getAll(
+        @Req() req,
         @Res() res,
         @Query() query: QueryDto
     ) {
-        const newQuery = this.shareService.APIFeatures(query);
+        try {
+            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
 
-        const users = await this.usersService.findAll(newQuery);
-        return res.json({
-            status: "success",
-            data: {
-                users
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
+
+            // if permission passed, check condition
+            // if condition is author, check if the user is the author
+            console.log({ permission });
+
+            if (permission.condition === "author") {
+                throw new Error('Permission denied');
             }
-        });
+
+            const newQuery = this.shareService.APIFeatures(query);
+            const users = await this.usersService.findAll(newQuery);
+            return res.json({
+                status: "success",
+                data: {
+                    users
+                }
+            });
+        } catch (error) {
+            return res.status(400).json({
+                status: "error",
+                message: error.message
+            });
+
+        }
+
     }
 
     @Get('/email/:email')
-    async getUserByEmail(
+    async getOneByEmail(
+        @Req() req,
         @Res() res,
         @Param('email') email: string
     ) {
         try {
+            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
+
+            // if permission passed, check condition
+            // if condition is author, check if the user is the author
+
             let user = await this.usersService.findEmail(email);
+                        
+            // if permission condition is author, check if user is null
+            // if user is not null, check if user id is not equal to userRole id
+            if (permission.condition === "author") {
+                if (!user) {
+                    throw new Error('Permission denied');
+                }
+                if (user.id !== userId) {
+                    throw new Error('Permission denied');
+                }
+            }
 
             if (!user) {
                 throw new NotFoundException('user not found');
@@ -93,12 +175,25 @@ export class UsersController {
     }
 
     @Patch('/:id')
-    async updateUser(
+    async update(
+        @Req() req,
         @Param('id') id: number,
         @Body() body: UpdateUserDto,
         @Res() res
     ) {
         try {
+            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Update, Subject.Users);
+
+            // if permission passed, check condition
+            // if condition is author, check if the user is the author
+
+            if (permission.condition === "author" && userId != id) {
+                throw new Error('Permission denied');
+            }
+
             const user = await this.usersService.update(id, body);
             return res.json({
                 status: "success",
@@ -115,12 +210,26 @@ export class UsersController {
     }
 
     @Delete('/:id')
-    async deleteUser(
+    async delete(
         @Param('id') id: number,
-        @Res() res
+        @Res() res,
+        @Req() req
     ) {
         try {
+            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Delete, Subject.Users);
+
+            // if permission passed, check condition
+            // if condition is author, check if the user is the author
+
+            if (permission.condition === "author" && userId != id) {
+                throw new Error('Permission denied');
+            }
+
             const user = await this.usersService.remove(id);
+
             return res.json({
                 status: "success",
                 data: {
@@ -134,36 +243,5 @@ export class UsersController {
             });
         }
     }
-
-    // @Get('/articles/:id')
-    // async getResource(
-    //     @Param('id') id: string,
-    //     @Res() res: Response,
-    //     @Req() req: Request
-    // ) {
-    //     const role = RolesController.getRole(req);
-
-    //     // action resource role
-    //     const getPermission = await this.usersService.getPermission("read", "articles", role.name);
-    //     console.log({ getPermission });
-
-    //     if (!getPermission) {
-    //         throw new ForbiddenException('Not allowed');
-    //     }
-
-    //     console.log(getPermission.condition);
-
-    //     // check condition
-    //     // if (getPermission["condition"] === "author") {
-
-    //     // }
-
-    //     return (res as any).json({
-    //         status: "success",
-    //         data: {
-    //             resource: `you are allowed to read article 1 ${id}`
-    //         }
-    //     })
-    // }
 }
 

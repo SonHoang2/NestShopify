@@ -12,7 +12,7 @@ export class RolesService {
         @InjectRepository(Role) private roleRepo: Repository<Role>,
         @InjectRepository(User) private userRepo: Repository<User>,
         private jwtService: JwtService,
-    ) {}
+    ) { }
 
     extractTokenFromHeader(req: Request): string | undefined {
         const [type, token] = req.headers.authorization?.split(' ') ?? [];
@@ -22,28 +22,33 @@ export class RolesService {
     async getRoleAndUserId(req: Request): Promise<{ role: { name: string; id: number }; userId: number }> {
         // take token from header
         const token = this.extractTokenFromHeader(req);
-        
+
         if (!token) {
             throw new UnauthorizedException("you need to login");
         }
-        try {
 
-            await this.jwtService.verifyAsync(token, {
-                secret: process.env.JWT_SECRET
-            });
+        // verify token with secret
+        const validToken = await this.jwtService.verifyAsync(token, {
+            secret: process.env.JWT_SECRET
+        });
 
-            // get user id from token
-            const userId: number = this.jwtService.decode(token).id;
+        console.log({ validToken });
 
-            // get roles of user    
-            const role = await this.getRole(userId);
+        // get user id from token
+        const userId: number = this.jwtService.decode(token).id;
 
-            return {role, userId};
-        } catch (error) {
-            console.log({error});
-            
-            throw new UnauthorizedException("token is invalid or expired");
+        // check if user is active
+        const user = await this.userRepo.findOneBy({ id: userId, active: true });
+        console.log({ user });
+        
+        if (!user) {
+            throw new UnauthorizedException("this account can no longer be used");
         }
+
+        // get roles of user    
+        const role = await this.getRole(userId);
+
+        return { role, userId };
     }
 
     async getRole(id: number): Promise<{ name: string; id: number }> {
@@ -72,7 +77,7 @@ export class RolesService {
         return this.roleRepo.save(newRole);
     }
 
-    async changeRole({userId , roleName} : {userId: number, roleName: string}) {
+    async changeRole({ userId, roleName }: { userId: number, roleName: string }) {
         console.log(userId, roleName);
         const user = await this.userRepo.findOneBy({ id: userId });
 

@@ -8,7 +8,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Role } from './roles/role.entity';
 import { Permission } from './permissions/permission.entity';
 
-import { Comment } from './users/comment.entity';
 import { RolesModule } from './roles/roles.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CategoryImage } from './categories/category-image.entity';
@@ -24,13 +23,14 @@ import { FlashSaleItem } from './flash-sales/flash-sale-item.entity';
 import { FlashSale } from './flash-sales/flash-sale.entity';
 import { ItemImage } from './items/item-image.entity';
 import { Action } from './actions/action.entity';
-import { Article } from './users/article.entity';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ActionsModule } from './actions/actions.module';
 import { Voucher } from './vouchers/voucher.entity';
 import { VouchersModule } from './vouchers/vouchers.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
     imports: [
@@ -49,8 +49,8 @@ import { VouchersModule } from './vouchers/vouchers.module';
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE'),
                     entities: [
-                        User, Role, Permission, Action, Article, 
-                        Comment, Category, CategoryImage, Item,
+                        User, Role, Permission, Action, 
+                        Category, CategoryImage, Item,
                         ItemImage, Order, OrderItem, Voucher, 
                         FlashSaleItem, FlashSale, Permission,
                         Action
@@ -59,6 +59,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
                 }
             },
         }),
+        ScheduleModule.forRoot(),
         UsersModule,
         RolesModule,
         CategoriesModule,
@@ -70,6 +71,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
         AuthModule,
         PermissionsModule,
         ActionsModule,
+        NotificationModule,
     ],
     controllers: [AppController],
     providers: [AppService],
