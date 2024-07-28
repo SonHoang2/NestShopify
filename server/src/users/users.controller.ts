@@ -13,7 +13,7 @@ export class UsersController {
         private usersService: UsersService,
         private shareService: ShareService,
         private permissionsService: PermissionsService,
-        private roleService: RolesService
+        private rolesService: RolesService
     ) { }
 
     @Get('/active')
@@ -23,14 +23,13 @@ export class UsersController {
         @Query() query: QueryDto
     ) {
         try {
-            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
 
             // if permission passed, check condition
             // if condition is author, check if the user is the author
-            console.log({ permission });
 
             if (permission.condition === "author") {
                 throw new Error('Permission denied');
@@ -61,14 +60,13 @@ export class UsersController {
         @Param('id') id: number
     ) {
         try {
-            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
 
             // if permission passed, check condition
             // if condition is author, check if the user is the author
-            console.log({ permission });
 
             if (permission.condition === "author" && userId != id) {
                 throw new Error('Permission denied');
@@ -96,7 +94,7 @@ export class UsersController {
         @Query() query: QueryDto
     ) {
         try {
-            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
@@ -134,7 +132,7 @@ export class UsersController {
         @Param('email') email: string
     ) {
         try {
-            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Users);
@@ -182,7 +180,7 @@ export class UsersController {
         @Res() res
     ) {
         try {
-            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Update, Subject.Users);
@@ -216,7 +214,7 @@ export class UsersController {
         @Req() req
     ) {
         try {
-            const { role: userRole, userId } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
             // check permission for role
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Delete, Subject.Users);

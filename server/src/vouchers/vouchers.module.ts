@@ -9,6 +9,7 @@ import { Voucher } from './voucher.entity';
         TypeOrmModule.forFeature([Voucher]),
     ],
     controllers: [VouchersController],
-    providers: [VouchersService]
+    providers: [VouchersService],
+    exports: [VouchersService]
 })
 export class VouchersModule { }

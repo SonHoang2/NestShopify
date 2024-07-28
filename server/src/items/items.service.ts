@@ -31,7 +31,7 @@ export class ItemsService {
         const item = await this.itemRepo.findOneBy({ id })
         
         if (!item) {
-            throw new HttpException('not found item', HttpStatus.BAD_REQUEST);
+            throw new Error('not found item');
         }
 
         return item;
@@ -60,5 +60,15 @@ export class ItemsService {
             .select('*')
             .where('item_images.item = :itemId', { itemId })
             .getRawMany();
+    }
+
+    async delete(id: number) {
+        const item = await this.getOne(id);
+
+        if (!item) {
+            throw new Error('Item not found');
+        }
+
+        return this.itemRepo.delete(item);
     }
 }

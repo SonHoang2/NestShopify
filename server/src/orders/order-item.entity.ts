@@ -12,7 +12,7 @@ export class OrderItem {
     quantity: number;
 
     @Column('decimal', { precision: 10, scale: 2 })
-    totalAmount: string;
+    totalAmount: number;
 
     @Column()
     orderId: number;

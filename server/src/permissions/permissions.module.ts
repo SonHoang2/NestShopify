@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PermissionsController } from './permissions.controller';
 import { PermissionsService } from './permissions.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { CommonModule } from 'src/common/common.module';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Permission]),
-        RolesModule,
+        forwardRef(() => RolesModule),
         ActionsModule,
         CommonModule
     ],

@@ -28,18 +28,15 @@ export class RolesService {
         }
 
         // verify token with secret
-        const validToken = await this.jwtService.verifyAsync(token, {
+        await this.jwtService.verifyAsync(token, {
             secret: process.env.JWT_SECRET
         });
-
-        console.log({ validToken });
 
         // get user id from token
         const userId: number = this.jwtService.decode(token).id;
 
         // check if user is active
         const user = await this.userRepo.findOneBy({ id: userId, active: true });
-        console.log({ user });
         
         if (!user) {
             throw new UnauthorizedException("this account can no longer be used");
@@ -61,11 +58,11 @@ export class RolesService {
         return roles;
     }
 
-    getRoles() {
+    getAll() {
         return this.roleRepo.find();
     }
 
-    async createRole(role: string) {
+    async create(role: string) {
         const existRole = await this.roleRepo.findOneBy({ name: role });
 
         if (existRole) {
@@ -96,7 +93,7 @@ export class RolesService {
         return this.userRepo.save(user);
     }
 
-    async deleteRole(roleName: string) {
+    async delete(roleName: string) {
         const role = await this.roleRepo.findOneBy({ name: roleName });
         console.log(role);
         if (!role) {

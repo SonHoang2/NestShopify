@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Order } from "src/orders/order.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("vouchers")
 export class Voucher {
@@ -19,4 +20,7 @@ export class Voucher {
 
     @Column({ default: 0 })
     currentUses: number;
+
+    @OneToMany(() => Order, order => order.voucher)
+    orders: Order[];
 }

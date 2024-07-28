@@ -1,16 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { UpdateCategoryDto } from './dtos/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PermissionsService } from 'src/permissions/permissions.service';
+import { RolesService } from 'src/roles/roles.service';
+import { Action, Subject } from 'src/common/variable';
 
 @Controller('/api/v1/categories')
 export class CategoriesController {
     constructor(
         private categoriesService: CategoriesService,
+        private permissionsService: PermissionsService,
+        private rolesService: RolesService,
     ) { }
 
     @Get('/')
-    async getCategories(
+    async getAllCategories(
         @Res() res
     ) {
         try {
@@ -58,9 +63,16 @@ export class CategoriesController {
 
     @Post('/')
     async createCategory(
+        @Req() req,
         @Body() body: { name: string, active: boolean },
-        @Res() res) {
+        @Res() res
+    ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Create, Subject.Categories);
+
             const categories = await this.categoriesService.createCategory(body);
             return res.json({
                 status: 'success',
@@ -78,11 +90,17 @@ export class CategoriesController {
 
     @Patch('/:id')
     async updateCategory(
+        @Req() req,
         @Res() res,
         @Param('id') id: number,
         @Body() body: UpdateCategoryDto
     ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Update, Subject.Categories);
+
             const category = await this.categoriesService.updateCategory(id, body);
 
             return res.json({
@@ -101,10 +119,16 @@ export class CategoriesController {
 
     @Delete('/:id')
     async deleteCategory(
+        @Req() req,
         @Res() res,
         @Param('id') id: number,
     ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Delete, Subject.Categories);
+
             const category = await this.categoriesService.deleteCategory(id);
 
             res.json({
@@ -124,11 +148,17 @@ export class CategoriesController {
     @Post('/images')
     @UseInterceptors(FileInterceptor('image'))
     async createCategoryImage(
+        @Req() req,
         @Res() res,
         @Body() body: { position: number, categoryId: number },
         @UploadedFile() file: Express.Multer.File
     ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Create, Subject.CategoryImages);
+
             const categorieImage = await this.categoriesService.createCategoryImage({ ...body, file });
 
             return res.json({
@@ -195,11 +225,17 @@ export class CategoriesController {
 
     @Patch('/images/:id')
     async updateImage(
+        @Req() req,
         @Res() res,
         @Param("id") id: number,
         @Body() body: { image: string, position: number, categoryId: number },
     ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Update, Subject.CategoryImages);
+
             const categoryImage = await this.categoriesService.updateImage(id, body);
 
             return res.json({
@@ -219,9 +255,15 @@ export class CategoriesController {
     @Delete('/images/:id')
     async deleteImage(
         @Res() res,
-        @Param('id') id: number
+        @Param('id') id: number,
+        @Req() req
     ) {
         try {
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Delete, Subject.CategoryImages);
+
             const categoryImage = await this.categoriesService.deleteImage(id);
 
             return res.json({

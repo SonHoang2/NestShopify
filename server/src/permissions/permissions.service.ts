@@ -34,12 +34,13 @@ export class PermissionsService {
 
     async delete(id: number) {
         const permission = await this.permissionRepo.findOneBy({ id });
+        if (!permission) {
+            throw new Error('Permission not found');
+        }
         return this.permissionRepo.remove(permission);
     }
 
     async checkPermission(role: string, action: string, subject: string) {
-
-
         let permission = await this.permissionRepo.createQueryBuilder('permissions')
             .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
             .leftJoin('permissions.action', 'actions')
@@ -49,9 +50,13 @@ export class PermissionsService {
                 { role, action, subject }
             )
             .getRawOne();
-            
+
         // console.log({ permission });
-         
+
+        if (!permission) {
+            throw new Error('Permission denied');
+        }
+
         return permission;
     }
 

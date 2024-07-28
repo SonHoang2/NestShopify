@@ -7,55 +7,16 @@ import { RolesService } from 'src/roles/roles.service';
 import { ActionsService } from 'src/actions/actions.service';
 import { QueryDto } from 'src/common/dtos/query.dto';
 import { ShareService } from 'src/common/share/share.service';
+import { Action, Subject } from 'src/common/variable';
 
 @Controller('/api/v1/permissions')
 export class PermissionsController {
     constructor(
         private permissionsService: PermissionsService,
-        private roleService: RolesService,
+        private rolesService: RolesService,
         private actionsService: ActionsService,
         private shareService: ShareService
     ) { }
-
-
-    // @Post('/roles/:roleName/permissions')
-    // async createRolePermission(
-    //     @Body() body: { userAction: string, subject: string, role: number, condition: string },
-    //     @Res() res: Response,
-    //     @Req() req: Request
-    // ) {
-    //     try {
-    //         const { userId, role: userRole } = await this.getRoleAndUserId(req););
-    //         console.log(userRole);
-
-    //         // check permission of user
-    //         if (userRole.name !== "admin") {
-    //             throw new ForbiddenException('The role does not have permission to create role permission');
-    //         }
-
-    //         // create role action
-    //         const action = await this.rolesService.createAction(body.userAction, body.subject, body.condition);
-    //         console.log({ action });
-
-
-    //         // create permission
-    //         const permission = await this.rolesService.createPermission(action.id, body.role);
-    //         console.log(permission);
-
-    //         return (res as any).json({
-    //             status: 'success',
-    //             data: {
-    //                 // permission
-    //             },
-    //         });
-    //     } catch (error) {
-    //         console.log({ error });
-    //         return (res as any).json({
-    //             status: 'error',
-    //             message: error.message,
-    //         });
-    //     }
-    // }
 
     @Get()
     async getAll(
@@ -64,11 +25,10 @@ export class PermissionsController {
         @Query() query: QueryDto
     ) {
         try {
-            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
-            if (userRole.name !== "admin") {
-                throw new ForbiddenException('The role does not have permission to read role permission');
-            }
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Permissions);
 
             const newQuery = this.shareService.APIFeatures(query);
 
@@ -95,17 +55,15 @@ export class PermissionsController {
         @Body() body: CreatePermissionDto
     ) {
         try {
-            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
-            if (userRole.name !== "admin") {
-                throw new ForbiddenException('The role does not have permission to create role permission');
-            }
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Create, Subject.Permissions);
+
 
             const action = await this.actionsService.create(body);
-            console.log({ action });
 
             const permission = await this.permissionsService.create(action.id, body.roleId);
-            console.log({ permission });
 
             return res.status(201).json({
                 status: 'success',
@@ -128,11 +86,10 @@ export class PermissionsController {
         @Param('id') id: number
     ) {
         try {
-            const { role: userRole } = await this.roleService.getRoleAndUserId(req);
+            const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
 
-            if (userRole.name !== "admin") {
-                throw new ForbiddenException('The role does not have permission to delete role permission');
-            }
+            // check permission for role
+            await this.permissionsService.checkPermission(userRole.name, Action.Delete, Subject.Permissions);
 
             const permission = await this.permissionsService.delete(id);
 

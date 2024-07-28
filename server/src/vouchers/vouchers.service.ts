@@ -30,7 +30,7 @@ export class VouchersService {
         return this.voucherRepository.save(voucher);
     }
 
-    async update(id: number, attrs : UpdateVoucherDto) {
+    async update(id: number, attrs: UpdateVoucherDto) {
         const voucher = await this.voucherRepository.findOneBy({ id });
 
         if (!voucher) {
@@ -51,5 +51,26 @@ export class VouchersService {
         }
 
         return this.voucherRepository.remove(voucher);
+    }
+
+    async validate({ id, code }: { id?: number, code?: string }) {
+        const voucher = await this.voucherRepository.createQueryBuilder('voucher')
+            .select('*')
+            .where('voucher.code = :code OR voucher.id = :id', { code, id })
+            .getRawOne();
+
+        if (!voucher) {
+            throw new Error('Voucher not found');
+        }
+
+        if (voucher.currentUses > voucher.maxUses) {
+            throw new Error('Voucher has reached its limit of uses');
+        }
+
+        if (voucher.expirationDate < new Date()) {
+            throw new Error('Voucher has expired');
+        }
+
+        return voucher;
     }
 }

@@ -4,30 +4,38 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 import { Item } from 'src/items/item.entity';
+import { VouchersService } from 'src/vouchers/vouchers.service';
+import { FlashSaleItem } from 'src/flash-sales/flash-sale-item.entity';
 
 @Injectable()
 export class OrdersService {
     constructor(
+        private voucherService: VouchersService,
         @InjectRepository(Order) private orderRepo: Repository<Order>,
         @InjectRepository(OrderItem) private OrderItemRepo: Repository<OrderItem>,
         @InjectRepository(Item) private itemRepo: Repository<Item>,
+        @InjectRepository(FlashSaleItem) private flashSaleItems: Repository<FlashSaleItem>
     ) { }
 
+    getAllOrders() {
+        return this.orderRepo.createQueryBuilder('orders')
+            .select('*')
+            .where('createdAt IS NOT NULL')
+            .getRawMany();
+    }
 
-    async getAllOrdersByUser(userId: number) {
-        return await this.orderRepo.createQueryBuilder('orders')
+    getAllOrdersByUser(userId: number) {
+        return this.orderRepo.createQueryBuilder('orders')
             .select('*')
             .where('orders.userId = :userId AND createdAt IS NOT NULL', { userId })
             .getRawMany();
     }
 
     findCartByUser(userId: number) {
-        const order = this.orderRepo.createQueryBuilder('orders')
+        return this.orderRepo.createQueryBuilder('orders')
             .select('*')
             .where('orders.userId = :userId AND createdAt IS NULL', { userId })
             .getRawOne();
-
-        return order;
     }
 
     async getCart(id: number) {
@@ -41,12 +49,23 @@ export class OrdersService {
         const order = await this.findCartByUser(userId);
 
         if (order) {
-            throw new Error('Order already exist');
+            return order;
         }
 
         const newOrder = this.orderRepo.create({ userId });
 
         return await this.orderRepo.save(newOrder);
+    }
+
+    async completeCart(cartId: number, status: string) {
+        await this.orderRepo.update({ id: cartId }, { status });
+
+        const total = await this.OrderItemRepo.createQueryBuilder('order_items')
+            .select('SUM(totalAmount) as total')
+            .where('order_items.orderId = :cartId', { cartId })
+            .getRawOne();
+
+        return this.orderRepo.save({ id: cartId, totalAmount: total.total });
     }
 
     async createCartItem({ orderId, itemId, quantity }: { orderId: number; itemId: number; quantity: number }) {
@@ -116,11 +135,43 @@ export class OrdersService {
     }
 
     async getCartItems(orderId: number) {
-        return await this.OrderItemRepo.createQueryBuilder('order_items')
-            .select(' order_items.id, name, order_items.quantity, totalAmount, salePrice as price, order_items.itemId')
+        // get all items in cart
+        const cart = await this.OrderItemRepo.createQueryBuilder('order_items')
+            .select('order_items.id, name, order_items.quantity, totalAmount, salePrice as price, order_items.itemId')
             .leftJoin("order_items.item", "item")
             .where('order_items.orderId = :orderId', { orderId })
+
             .getRawMany();
+
+        // check if there is a flash sale for the item
+        const newCartItems = cart.map(async (item) => {
+            const flashSaleItem = await this.flashSaleItems.createQueryBuilder('flash_sale_items')
+                .select('*')
+                .leftJoin("flash_sale_items.flashSale", "flash_sale")
+                .where(
+                    'flash_sale_items.itemId = :itemId AND flash_sale.startTime < NOW() AND flash_sale.endTime > NOW() AND ' +
+                    'flash_sale_items.quantity > 0 AND flash_sale_items.quantity >= :quantity',
+                    { itemId: item.itemId, quantity: item.quantity }
+                )
+                .getRawOne();
+
+
+            if (flashSaleItem && item.totalAmount != flashSaleItem.price * item.quantity) {
+                console.log(item.totalAmount, flashSaleItem.price * item.quantity);
+
+                this.OrderItemRepo.createQueryBuilder('order_items')
+                    .update(OrderItem)
+                    .set({ totalAmount: flashSaleItem.price * item.quantity })
+                    .where('id = :id', { id: item.id })
+                    .execute();
+
+                return { ...item, price: flashSaleItem.price };
+            }
+
+            return item
+        });
+
+        return Promise.all(newCartItems);
     }
 
     async sumCart(orderId: number) {
@@ -134,12 +185,40 @@ export class OrdersService {
 
     async createCheckout(userId: number) {
         const order = await this.OrderItemRepo.createQueryBuilder('order_items')
-            .select('items.id as itemId, order_items.quantity, items.quantity as stock')
+            .select('items.id as itemId, order_items.quantity, items.quantity as stock, orders.voucherId, orders.status')
             .leftJoin("order_items.order", "orders")
             .leftJoin('orders.user', 'users')
             .leftJoin("order_items.item", "items")
             .where('users.id = :userId AND orders.createdAt IS NULL', { userId })
             .getRawMany();
+
+        // check if cart is completed
+        if (order[0]?.status !== 'completed') {
+            throw new Error('Cart is not completed');
+        }
+
+        // check flash sale items time is still valid
+        const flashSale = await this.flashSaleItems.createQueryBuilder('flash_sale_items')
+            .select('*')
+            .leftJoin("flash_sale_items.flashSale", "flash_sale")
+            .getRawMany();
+
+        console.log(flashSale);
+
+
+        if (flashSale[0].endTime < new Date()) {
+            throw new Error('Flash sale has ended');
+        }
+
+        // check if flash sale items quantity is still valid
+        for (let i = 0; i < flashSale.length; i++) {
+            if (flashSale[i].quantity - order[i].quantity < 0) {
+                throw new Error('Flash sale item is out of stock');
+            }
+        }
+
+        // check if voucher is valid
+        await this.voucherService.validate({ id: order[0].voucherId });
 
         let restore: boolean = false;
 
@@ -159,7 +238,7 @@ export class OrdersService {
         });
 
         const itemsUpdate = await Promise.all(itemsUpdatePromises);
-        
+
         // if any of the stock update fails, restore the stock
         if (restore) {
             for (let i = 0; i < order.length; i++) {
@@ -181,9 +260,38 @@ export class OrdersService {
             .set({ createdAt: new Date() })
             .where('userId = :userId AND createdAt IS NULL', { userId })
             .execute();
-        
+
         console.log(updatedOrder);
 
         return "Payment successful";
     }
+
+    getAllCarts() {
+        return this.orderRepo.createQueryBuilder('orders')
+            .select('*')
+            .where('createdAt IS NULL')
+            .getRawMany();
+    }
+
+    getOrderByOrderItem(cartItemId: number) {
+        return this.OrderItemRepo.createQueryBuilder('order_items')
+            .select('userId, orderId')
+            .leftJoin("order_items.order", "orders")
+            .where('order_items.id = :cartItemId', { cartItemId })
+            .getRawOne();
+    }
+
+    async applyVoucher(cart, voucherId: number, discount: number) {
+        // if cart already has a voucher, return the cart
+        if (cart.voucherId) {
+            return cart;
+        }
+
+        const totalAmount = cart.totalAmount * (1 - discount);
+
+        Object.assign(cart, { voucherId, totalAmount });
+
+        return this.orderRepo.save(cart);
+    }
+
 }
