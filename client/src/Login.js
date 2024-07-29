@@ -17,7 +17,7 @@ export default function Login() {
             try {
                 const { code } = queryString.parse(location.search);
 
-                const URL = serverURL + `/auth/google?code=${code}&redirectUri=${baseURL}/auth/google`;
+                const URL = serverURL + `/api/v1/auth/google?code=${code}&redirectUri=${baseURL}/auth/google`;
                 const response = await fetch(URL, {
                     method: 'POST',
                 });
@@ -58,44 +58,6 @@ export default function Login() {
     return (
         <div >
             <div className="shadow border px-5 py-4 bg-white rounded w-400">
-                <form>
-                    <p className="text-success pb-4 fs-3 fw-bold text-center">LOGIN TO YOUR ACCOUNT</p>
-                    {
-                        error &&
-                        <div className="alert alert-danger fw-bold" role="alert">{error}. Try again.</div>
-                    }
-                    <div className="d-flex flex-column pb-3">
-                        <label className="form-label fw-bold" htmlFor="email">Email address</label>
-                        <input
-                            className="form-control border-0 bg-body-secondary shadow-none"
-                            id="email"
-                            type="text"
-                            placeholder="you@example.com"
-                            onChange={e => setEmail(e.target.value)}
-                            autoComplete="on"
-                            required
-                        />
-                    </div>
-                    <div className="d-flex flex-column pb-3">
-                        <label className="form-label fw-bold" htmlFor="password">Password</label>
-                        <input
-                            className="form-control border-0 bg-body-secondary shadow-none"
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            onChange={e => setPassword(e.target.value)}
-                            autoComplete="on"
-                            required
-                        />
-                    </div>
-                    <div className="d-flex justify-content-center mt-3">
-                        <input
-                            type="submit"
-                            value="Login"
-                            className="bg-success text-white border-0 rounded-pill px-5 py-2"
-                        />
-                    </div>
-                </form>
                 <div className="d-flex justify-content-center my-3">
                     <button
                         className="btn btn-light border shadow-sm  w-100 d-flex align-items-center justify-content-center"
