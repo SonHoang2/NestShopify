@@ -294,4 +294,15 @@ export class OrdersService {
         return this.orderRepo.save(cart);
     }
 
+    async getReportByMonthAndYear(month: number, year: number) {
+        const report = await this.orderRepo.createQueryBuilder('orders')
+            // COALESCE help return 0 if there is no order instead of null
+            .select('COALESCE(sum(totalAmount), 0) as totalAmount, count(id) as totalOrders')
+            .where('MONTH(createdAt) = :month AND YEAR(createdAt) = :year', { month, year })
+            .getRawMany();
+
+        console.log(report);
+
+        return report;
+    }
 }

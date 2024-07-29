@@ -380,4 +380,36 @@ export class OrdersController {
         }
     }
 
+    @Get('/orders/reports/month/:month/year/:year')
+    async getReportByMonthAndYear(
+        @Res() res,
+        @Req() req,
+        @Param('month') month: number,
+        @Param('year') year: number,
+    ) {
+        try {
+            const { role: userRole } = await this.rolesService.getRoleAndUserId(req);
+
+            // check permission for role
+            const permission = await this.permissionsService.checkPermission(userRole.name, Action.Read, Subject.Orders);
+
+            if (permission.condition === "author") {
+                throw new Error('Permission denied');
+            }
+
+            const report = await this.ordersService.getReportByMonthAndYear(month, year);
+
+            res.json({
+                status: 'success',
+                data: {
+                    report
+                },
+            });
+        } catch (error) {
+            return res.json({
+                status: 'error',
+                message: error.message,
+            });
+        }
+    }
 }
