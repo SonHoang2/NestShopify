@@ -39,7 +39,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -69,7 +69,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -97,7 +97,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -125,7 +125,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -155,7 +155,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -183,7 +183,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -211,7 +211,7 @@ export class ItemsController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });

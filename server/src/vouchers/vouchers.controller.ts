@@ -23,7 +23,7 @@ export class VouchersController {
                 },
             });
         } catch (error) {
-            res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -45,7 +45,7 @@ export class VouchersController {
                 },
             });
         } catch (error) {
-            res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -67,7 +67,7 @@ export class VouchersController {
                 },
             });
         } catch (error) {
-            res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -90,7 +90,7 @@ export class VouchersController {
                 },
             });
         } catch (error) {
-            res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -112,7 +112,7 @@ export class VouchersController {
                 },
             });
         } catch (error) {
-            res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });

@@ -27,7 +27,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -54,7 +54,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -81,7 +81,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -110,7 +110,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -138,7 +138,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -168,7 +168,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -190,7 +190,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -216,7 +216,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -245,7 +245,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -273,7 +273,7 @@ export class CategoriesController {
                 }
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });

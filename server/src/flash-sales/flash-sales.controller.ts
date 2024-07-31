@@ -28,7 +28,7 @@ export class FlashSalesController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -51,7 +51,7 @@ export class FlashSalesController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -98,7 +98,7 @@ export class FlashSalesController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -142,7 +142,7 @@ export class FlashSalesController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -164,7 +164,7 @@ export class FlashSalesController {
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -183,13 +183,11 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    ...flashSale,
-                    startTime: flashSale.startTime.toString(),
-                    endTime: flashSale.endTime.toString()
+                    flashSale
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -207,13 +205,11 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    ...flashSale,
-                    startTime: flashSale.startTime.toString(),
-                    endTime: flashSale.endTime.toString()
+                    flashSale
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -226,21 +222,15 @@ export class FlashSalesController {
     ) {
         try {
             const flashSales = await this.flashSalesService.getAllFlashSales();
-            // convert time UTC to vietnam
-            const convertTime = flashSales.map(flashSale => ({
-                ...flashSale,
-                startTime : flashSale.startTime.toString(),
-                endTime : flashSale.endTime.toString(),
-            }));
 
             return res.json({
                 status: 'success',
                 data: {
-                    flashSales: convertTime
+                    flashSales
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -259,13 +249,11 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    ...flashSale,
-                    startTime: flashSale.startTime.toString(),
-                    endTime: flashSale.endTime.toString()
+                    flashSale
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
@@ -283,13 +271,11 @@ export class FlashSalesController {
             return res.json({
                 status: 'success',
                 data: {
-                    ...flashSale,
-                    startTime: flashSale.startTime.toString(),
-                    endTime: flashSale.endTime.toString()
+                    flashSale
                 },
             });
         } catch (error) {
-            return res.json({
+            return res.status(400).json({
                 status: 'error',
                 message: error.message,
             });
