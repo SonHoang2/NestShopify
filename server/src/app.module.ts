@@ -42,20 +42,20 @@ import { NotificationModule } from './notification/notification.module';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
                 return {
-                    type: "mysql",
+                    type: "postgres",
                     host: configService.get('DB_HOST'),
                     port: +configService.get('DB_PORT'), // Unary plus to convert string to number
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE'),
                     entities: [
-                        User, Role, Permission, Action, 
+                        User, Role, Permission, Action,
                         Category, CategoryImage, Item,
-                        ItemImage, Order, OrderItem, Voucher, 
+                        ItemImage, Order, OrderItem, Voucher,
                         FlashSaleItem, FlashSale, Permission,
                         Action
                     ],
-                    synchronize: true, // only run in development
+                    // synchronize: true, // only run in development
                 }
             },
         }),
