@@ -1,18 +1,27 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { PermissionsService } from './permissions.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PermissionsService } from './permissions.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Permission } from './permission.entity';
 
-// describe('PermissionsService', () => {
-//   let service: PermissionsService;
+describe('PermissionsService', () => {
+    let service: PermissionsService;
 
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [PermissionsService],
-//     }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                PermissionsService,
+                {
+                    provide: getRepositoryToken(Permission),
+                    useValue: {}
+                }
 
-//     service = module.get<PermissionsService>(PermissionsService);
-//   });
+            ],
+        }).compile();
 
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-// });
+        service = module.get<PermissionsService>(PermissionsService);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+});
