@@ -43,7 +43,8 @@ export class AuthController {
     @Get('/verify/email/:token')
     async verifyEmail(
         @Param('token') token: string,
-        @Res() res: Response) {
+        @Res() res: Response
+    ) {
         return this.authService.verifyEmail(token, res);
     }
 }

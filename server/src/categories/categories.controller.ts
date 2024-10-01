@@ -159,8 +159,11 @@ export class CategoriesController {
             // check permission for role
             await this.permissionsService.checkPermission(userRole.name, Action.Create, Subject.CategoryImages);
 
+            
             const categorieImage = await this.categoriesService.createCategoryImage({ ...body, file });
 
+            console.log(categorieImage);
+            
             return res.json({
                 status: 'success',
                 data: {

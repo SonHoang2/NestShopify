@@ -21,7 +21,7 @@ export class AuthService {
     }
 
     generateRandowString(length: number) {
-        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$';
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         return Array.from(crypto.getRandomValues(new Uint32Array(length)))
             .map((x) => characters[x % characters.length])
             .join('');
@@ -29,8 +29,12 @@ export class AuthService {
 
     async verifyEmail(token: string, res) {
         try {
+            console.log({ token });
+            
             // check if token is valid
             const user = await this.usersService.findToken(token);
+            console.log({ user });
+            
 
             if (!user) {
                 throw new NotFoundException('Token is invalid or has expired');
@@ -57,7 +61,8 @@ export class AuthService {
             const token = this.generateRandowString(32);
             // save token to db
             const user = await this.usersService.saveToken(email, token);
-
+            console.log(token);
+            
             // send email
             await this.MailerService.sendMail({
                 from: process.env.EMAIL_USERNAME,
@@ -72,7 +77,7 @@ export class AuthService {
                 `,
             })
 
-            return res.json(
+            return res.status(200).json(
                 {
                     status: 'success',
                     message: 'Token sent to email!',
@@ -112,7 +117,7 @@ export class AuthService {
             delete newUser.password;
             delete newUser.token;
 
-            return res.json({
+            return res.status(201).json({
                 status: 'success',
                 token,
                 data: {
@@ -149,7 +154,7 @@ export class AuthService {
             delete user.password;
             delete user.token;
 
-            return res.json({
+            return res.status(200).json({
                 status: 'success',
                 token,
                 data: {
