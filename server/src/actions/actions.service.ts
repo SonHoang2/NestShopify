@@ -18,7 +18,7 @@ export class ActionsService {
             return existAction;
         }
 
-        const newAction = await this.actionRepo.create({ name: action, tableName: subject, condition });
+        const newAction = this.actionRepo.create({ name: action, tableName: subject, condition });
         return this.actionRepo.save(newAction);
     }
 }
