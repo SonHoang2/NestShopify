@@ -36,14 +36,16 @@ export class AuthController {
     @Post('/verify/email')
     async emailRegister(
         @Body() Body: { email: string },
-        @Res() res: Response) {
+        @Res() res: Response
+    ) {
         return this.authService.emailRegister(Body, res);
     }
 
     @Get('/verify/email/:token')
     async verifyEmail(
         @Param('token') token: string,
-        @Res() res: Response) {
+        @Res() res: Response
+    ) {
         return this.authService.verifyEmail(token, res);
     }
 }

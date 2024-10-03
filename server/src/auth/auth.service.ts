@@ -16,7 +16,7 @@ export class AuthService {
         private MailerService: MailerService,
     ) { }
 
-    signToken(id: number) {
+    signToken(id: number): string {
         return this.jwtService.sign({ id });
     }
 
