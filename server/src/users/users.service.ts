@@ -120,36 +120,4 @@ export class UsersService {
             .getRawOne();
     }
 
-    
-
-    // async getPermission(actionName: string, resource: string, roleName: string) {
-    //     const permission = await this.permissionRepo.createQueryBuilder('permissions')
-    //         .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
-    //         .leftJoin('permissions.action', 'actions')
-    //         .leftJoin('permissions.role', 'roles')
-    //         .where(
-    //             'actions.name = :actionName AND roles.name = :roleName AND actions.tableName = :tableName',
-    //             { actionName, roleName, tableName: resource }
-    //         )
-    //         .getRawOne();
-
-    //     return permission;
-    // }
-
-    // async createAction(userAction: string, subject: string, condition: string) {
-    //     // if action exist
-    //     const existAction = await this.actionRepo.findOneBy({ name: userAction, tableName: subject, condition: condition });
-    //     if (existAction) {
-    //         return existAction;
-    //     }
-
-    //     // if action not exist then create new one
-    //     const action = this.actionRepo.create({ name: userAction, tableName: subject, condition: condition });
-    //     return this.actionRepo.save(action);
-    // }
-
-    // createPermission(actionId: number, roleId: number) {
-    //     const permission = this.permissionRepo.create({ actionId: actionId, roleId: roleId });
-    //     return this.permissionRepo.save(permission);
-    // }
 }

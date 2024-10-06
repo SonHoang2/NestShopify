@@ -4,28 +4,39 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { User } from "../users/user.entity";
-import { CreateUserDto } from "src/users/dtos/create-user.dto";
+import { Response } from 'express';
 
 describe('AuthService', () => {
     let service: AuthService;
     let fakeUsersService: Partial<UsersService>
+    let fakeMailerService: MailerService
+    let fakeJwtService: JwtService
+    let user: User;
+
 
     beforeEach(async () => {
+        user = {
+            id: 1, // Assign a unique ID or use a mock ID
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'test@gmail.com',
+            password: 'password',
+            googleAccount: false,
+            avatar: 'avatar_default.png',
+            passwordChangedAt: new Date(),
+            token: null,
+            tokenExpires: null,
+            emailVerified: false,
+            active: true,
+            roleId: 4,
+            role: 4,
+            orders: []
+        }
+
         fakeUsersService = {
             // findEmail: () => Promise.resolve([]),
-            create: (info: CreateUserDto) => {
-                const user = {
-                    id: 1, // Assign a unique ID or use a mock ID
-                    email: info.email,
-                    password: info.password,
-                    googleAccount: false, // or any default value
-                    avatar: '',
-                } as User;
-
-                console.log("Promise.resolve(user)", Promise.resolve(user));
-
-                return Promise.resolve(user);
-            }
+            create: () => Promise.resolve(user),
+            saveToken: jest.fn(),
         };
 
         const module = await Test.createTestingModule({
@@ -44,7 +55,7 @@ describe('AuthService', () => {
                 {
                     provide: MailerService,
                     useValue: {
-                        sendMail: () => Promise.resolve([])
+                        sendMail: () => Promise.resolve(),
                     }
                 }
             ]
@@ -63,18 +74,20 @@ describe('AuthService', () => {
 
     it('check signToken return a string', async () => {
         const token = service.signToken(1);
-        console.log("token", token);
-
         expect(typeof token).toEqual('string');
     });
 
-    it('check emailRegister return a user', async () => {
-        const user = await service.emailRegister(
-            { email: "test@gmail.com" },
-            { json: () => { } }
-        );
+    it('check emailRegister. Should successfully send an email and respond with success', async () => {
+        const res: Partial<Response> = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn().mockReturnThis(),
+        };
 
-        console.log("user", user);
-
+        await service.emailRegister({email: "2@gmail.com"}, res);
+        
+        expect(res.json).toHaveBeenCalledWith({
+            status: 'success',
+            message: 'Token sent to email!',
+        });
     })
 });
