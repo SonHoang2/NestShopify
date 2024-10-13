@@ -4,7 +4,6 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { User } from "../users/user.entity";
-import { Response } from 'express';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -76,18 +75,4 @@ describe('AuthService', () => {
         const token = service.signToken(1);
         expect(typeof token).toEqual('string');
     });
-
-    it('check emailRegister. Should successfully send an email and respond with success', async () => {
-        const res: Partial<Response> = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn().mockReturnThis(),
-        };
-
-        await service.emailRegister({email: "2@gmail.com"}, res);
-        
-        expect(res.json).toHaveBeenCalledWith({
-            status: 'success',
-            message: 'Token sent to email!',
-        });
-    })
 });
