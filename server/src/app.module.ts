@@ -30,6 +30,9 @@ import { VouchersModule } from './vouchers/vouchers.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationModule } from './notification/notification.module';
 
+import { redisStore } from 'cache-manager-redis-store';
+import { CacheModule } from '@nestjs/cache-manager';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -38,7 +41,7 @@ import { NotificationModule } from './notification/notification.module';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => {
+            useFactory: (configService: ConfigService) => {    
                 return {
                     type: "postgres",
                     host: configService.get('DB_HOST'),
@@ -53,9 +56,15 @@ import { NotificationModule } from './notification/notification.module';
                         FlashSaleItem, FlashSale, Permission,
                         Action
                     ],
-                    // synchronize: true, // only run in development
+                    synchronize: true, // Set to true for development
                 }
             },
+        }),
+        CacheModule.register({
+            isGlobal: true,
+            host: 'localhost',
+            port: 6379,
+            store: redisStore as any,
         }),
         ScheduleModule.forRoot(),
         UsersModule,

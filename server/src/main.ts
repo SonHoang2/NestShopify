@@ -15,4 +15,8 @@ async function bootstrap() {
     await app.listen(5000);
 }
 
-ClusterService.clusterize(bootstrap);
+if (process.env.CLUSTER_MODE === 'true') {
+    ClusterService.clusterize(bootstrap);
+} else {
+    bootstrap();
+}

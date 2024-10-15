@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 
 import * as bcrypt from 'bcrypt';
 import { JwtPayload, decode } from 'jsonwebtoken';
@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from "@nestjs-modules/mailer";
 import { UsersService } from "src/users/users.service";
 import { CreateUserDto } from "src/users/dtos/create-user.dto";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private MailerService: MailerService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     signToken(id: number): string {
@@ -131,6 +134,10 @@ export class AuthService {
 
     async login(email: string, password: string, res) {
         try {
+            await this.cacheManager.set('email', email, 1000);
+            const cachedEmail = await this.cacheManager.get('email');
+            console.log({ cachedEmail });
+
             const user = await this.usersService.findEmail(email);
 
             if (!user) {
