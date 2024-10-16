@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectRepository(User) private userRepo: Repository<User>
+        @InjectRepository(User) private userRepo: Repository<User>,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     sanitizeUser(user: User) {
         delete user.password;
-        delete user.token;
         return user;
     }
 
@@ -107,49 +109,17 @@ export class UsersService {
         }
 
         // token expires in 10 minutes
-        let tokenExpires = new Date(Date.now() + 10 * 60 * 1000);
+        await this.cacheManager.set(token, email, { ttl: 10 * 60 } as any);
 
-        Object.assign(user, { token, tokenExpires });
-        return this.userRepo.save(user);
-    }
-
-    async findToken(token: string) {
-        return this.userRepo.createQueryBuilder('users')
-            .select("*")
-            .where('users.token = :token AND users.tokenExpires > :date', { token, date: new Date() })
-            .getRawOne();
+        return user;
     }
 
     
+    findToken(token: string) : Promise<string> {
+        return this.cacheManager.get(token);
+    }
 
-    // async getPermission(actionName: string, resource: string, roleName: string) {
-    //     const permission = await this.permissionRepo.createQueryBuilder('permissions')
-    //         .select("permissions.id, roles.name as roleName, actions.name as actionName, actions.tableName as tableName, actions.condition")
-    //         .leftJoin('permissions.action', 'actions')
-    //         .leftJoin('permissions.role', 'roles')
-    //         .where(
-    //             'actions.name = :actionName AND roles.name = :roleName AND actions.tableName = :tableName',
-    //             { actionName, roleName, tableName: resource }
-    //         )
-    //         .getRawOne();
-
-    //     return permission;
-    // }
-
-    // async createAction(userAction: string, subject: string, condition: string) {
-    //     // if action exist
-    //     const existAction = await this.actionRepo.findOneBy({ name: userAction, tableName: subject, condition: condition });
-    //     if (existAction) {
-    //         return existAction;
-    //     }
-
-    //     // if action not exist then create new one
-    //     const action = this.actionRepo.create({ name: userAction, tableName: subject, condition: condition });
-    //     return this.actionRepo.save(action);
-    // }
-
-    // createPermission(actionId: number, roleId: number) {
-    //     const permission = this.permissionRepo.create({ actionId: actionId, roleId: roleId });
-    //     return this.permissionRepo.save(permission);
-    // }
+    deleteToken(token: string) {
+        return this.cacheManager.del(token);
+    }
 }

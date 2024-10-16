@@ -8,6 +8,7 @@ import { MailerService } from "@nestjs-modules/mailer";
 import { UsersService } from "src/users/users.service";
 import { CreateUserDto } from "src/users/dtos/create-user.dto";
 
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -16,7 +17,7 @@ export class AuthService {
         private MailerService: MailerService,
     ) { }
 
-    signToken(id: number) {
+    signToken(id: number): string {
         return this.jwtService.sign({ id });
     }
 
@@ -27,22 +28,23 @@ export class AuthService {
             .join('');
     }
 
-    async verifyEmail(token: string, res) {
+    async verifyEmailCode(token: string, res) {
         try {
-            console.log({ token });
-            
             // check if token is valid
-            const user = await this.usersService.findToken(token);
-            console.log({ user });
-            
+            const tokenExist: string = await this.usersService.findToken(token);
 
-            if (!user) {
+            if (!tokenExist) {
                 throw new NotFoundException('Token is invalid or has expired');
             }
 
-            await this.usersService.update(user.id, { emailVerified: true, token: null, tokenExpires: null });
+            // find user by email
+            const user = await this.usersService.findEmail(tokenExist);
 
-            res.json({
+            await this.usersService.update(user.id, { emailVerified: true });
+
+            await this.usersService.deleteToken(token);
+
+            return res.json({
                 status: 'success',
                 message: 'token verified',
             });
@@ -53,10 +55,9 @@ export class AuthService {
                 message: error.message,
             });
         }
-
     }
 
-    async emailRegister({ email }: { email: string }, res) {
+    async sendCodeToEmail({ email }: { email: string }, res) {
         try {
             const token = this.generateRandowString(32);
             // save token to db
@@ -115,7 +116,6 @@ export class AuthService {
 
             // remove password and token from response
             delete newUser.password;
-            delete newUser.token;
 
             return res.status(201).json({
                 status: 'success',
@@ -152,7 +152,6 @@ export class AuthService {
 
             // remove password and token from response
             delete user.password;
-            delete user.token;
 
             return res.status(200).json({
                 status: 'success',

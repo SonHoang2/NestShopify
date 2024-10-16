@@ -6,6 +6,7 @@ import { ShareService } from 'src/common/share/share.service';
 import { PermissionsService } from 'src/permissions/permissions.service';
 import { RolesService } from 'src/roles/roles.service';
 import { Action, Subject } from '../common/variable';
+import { Request, Response } from 'express';
 
 @Controller('/api/v1/users')
 export class UsersController {
@@ -18,8 +19,8 @@ export class UsersController {
 
     @Get('/active')
     async getAllActiveUser(
-        @Req() req,
-        @Res() res,
+        @Req() req: Request,
+        @Res() res: Response,
         @Query() query: QueryDto
     ) {
         try {
@@ -55,8 +56,8 @@ export class UsersController {
 
     @Get('/:id')
     async getOne(
-        @Res() res,
-        @Req() req,
+        @Res() res: Response,
+        @Req() req: Request,
         @Param('id') id: number
     ) {
         try {
@@ -89,8 +90,8 @@ export class UsersController {
 
     @Get()
     async getAll(
-        @Req() req,
-        @Res() res,
+        @Req() req: Request,
+        @Res() res: Response,
         @Query() query: QueryDto
     ) {
         try {
@@ -127,8 +128,8 @@ export class UsersController {
 
     @Get('/email/:email')
     async getOneByEmail(
-        @Req() req,
-        @Res() res,
+        @Req() req: Request,
+        @Res() res: Response,
         @Param('email') email: string
     ) {
         try {
@@ -174,10 +175,10 @@ export class UsersController {
 
     @Patch('/:id')
     async update(
-        @Req() req,
+        @Req() req: Request,
         @Param('id') id: number,
         @Body() body: UpdateUserDto,
-        @Res() res
+        @Res() res: Response
     ) {
         try {
             const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
@@ -210,8 +211,8 @@ export class UsersController {
     @Delete('/:id')
     async delete(
         @Param('id') id: number,
-        @Res() res,
-        @Req() req
+        @Res() res: Response,
+        @Req() req: Request
     ) {
         try {
             const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);

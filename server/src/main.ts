@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { ClusterService } from './cluster.service';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -13,4 +14,9 @@ async function bootstrap() {
     )
     await app.listen(5000);
 }
-bootstrap();
+
+if (process.env.CLUSTER_MODE === 'true') {
+    ClusterService.clusterize(bootstrap);
+} else {
+    bootstrap();
+}

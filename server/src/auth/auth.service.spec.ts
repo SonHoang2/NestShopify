@@ -4,28 +4,36 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { User } from "../users/user.entity";
-import { CreateUserDto } from "src/users/dtos/create-user.dto";
 
 describe('AuthService', () => {
     let service: AuthService;
     let fakeUsersService: Partial<UsersService>
+    let fakeMailerService: MailerService
+    let fakeJwtService: JwtService
+    let user: User;
+
 
     beforeEach(async () => {
+        user = {
+            id: 1, // Assign a unique ID or use a mock ID
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'test@gmail.com',
+            password: 'password',
+            googleAccount: false,
+            avatar: 'avatar_default.png',
+            passwordChangedAt: new Date(),
+            emailVerified: false,
+            active: true,
+            roleId: 4,
+            role: 4,
+            orders: []
+        }
+
         fakeUsersService = {
             // findEmail: () => Promise.resolve([]),
-            create: (info: CreateUserDto) => {
-                const user = {
-                    id: 1, // Assign a unique ID or use a mock ID
-                    email: info.email,
-                    password: info.password,
-                    googleAccount: false, // or any default value
-                    avatar: '',   
-                } as User;
-                
-                console.log("Promise.resolve(user)", Promise.resolve(user));
-                
-                return Promise.resolve(user);
-            }
+            create: () => Promise.resolve(user),
+            saveToken: jest.fn(),
         };
 
         const module = await Test.createTestingModule({
@@ -44,7 +52,7 @@ describe('AuthService', () => {
                 {
                     provide: MailerService,
                     useValue: {
-                        sendMail: () => Promise.resolve([])
+                        sendMail: () => Promise.resolve(),
                     }
                 }
             ]
@@ -55,4 +63,10 @@ describe('AuthService', () => {
     it('can create an instance of AuthService', async () => {
         expect(service).toBeDefined();
     });
+
+    it('check generate random string return correct length', async () => {
+        const randomString = service.generateRandowString(32);
+        expect(randomString).toHaveLength(32);
+    });
+
 });
