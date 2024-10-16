@@ -30,7 +30,6 @@ export class AuthService {
 
     async verifyEmailCode(token: string, res) {
         try {
-
             // check if token is valid
             const tokenExist: string = await this.usersService.findToken(token);
 
@@ -63,7 +62,8 @@ export class AuthService {
             const token = this.generateRandowString(32);
             // save token to db
             const user = await this.usersService.saveToken(email, token);
-
+            console.log(token);
+            
             // send email
             await this.MailerService.sendMail({
                 from: process.env.EMAIL_USERNAME,
@@ -78,7 +78,7 @@ export class AuthService {
                 `,
             })
 
-            return res.json(
+            return res.status(200).json(
                 {
                     status: 'success',
                     message: 'Token sent to email!',
@@ -117,7 +117,7 @@ export class AuthService {
             // remove password and token from response
             delete newUser.password;
 
-            return res.json({
+            return res.status(201).json({
                 status: 'success',
                 token,
                 data: {
@@ -153,7 +153,7 @@ export class AuthService {
             // remove password and token from response
             delete user.password;
 
-            return res.json({
+            return res.status(200).json({
                 status: 'success',
                 token,
                 data: {

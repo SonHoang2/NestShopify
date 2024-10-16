@@ -64,7 +64,8 @@ export class RolesService {
 
     async create(role: string) {
         const existRole = await this.roleRepo.findOneBy({ name: role });
-
+        console.log(existRole);
+        
         if (existRole) {
             throw new ConflictException('role already exist');
         }

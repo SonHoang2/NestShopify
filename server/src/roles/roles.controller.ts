@@ -47,7 +47,7 @@ export class RolesController {
     async create(
         @Req() req,
         @Res() res,
-        @Body('roleName') roleName: string
+        @Body('name') name: string
     ) {
         try {
             const { role: userRole, userId } = await this.rolesService.getRoleAndUserId(req);
@@ -56,7 +56,7 @@ export class RolesController {
             const permission = await this.permissionsService.checkPermission(userRole.name, Action.Create, Subject.Roles);
 
             // if allowed create role
-            const role = await this.rolesService.create(roleName);
+            const role = await this.rolesService.create(name);
 
             return res.json({
                 status: 'success',
