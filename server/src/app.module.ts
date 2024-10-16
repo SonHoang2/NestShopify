@@ -65,6 +65,7 @@ import { CacheModule } from '@nestjs/cache-manager';
             host: 'localhost',
             port: 6379,
             store: redisStore as any,
+            ttl: 30 * 60, // 30 minutes
         }),
         ScheduleModule.forRoot(),
         UsersModule,

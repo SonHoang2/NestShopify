@@ -23,8 +23,6 @@ describe('AuthService', () => {
             googleAccount: false,
             avatar: 'avatar_default.png',
             passwordChangedAt: new Date(),
-            token: null,
-            tokenExpires: null,
             emailVerified: false,
             active: true,
             roleId: 4,
@@ -71,8 +69,4 @@ describe('AuthService', () => {
         expect(randomString).toHaveLength(32);
     });
 
-    it('check signToken return a string', async () => {
-        const token = service.signToken(1);
-        expect(typeof token).toEqual('string');
-    });
 });

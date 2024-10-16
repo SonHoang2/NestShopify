@@ -28,24 +28,24 @@ export class AuthService {
             .join('');
     }
 
-    async verifyEmailCode(token: string , res) {
+    async verifyEmailCode(token: string, res) {
         try {
 
             // check if token is valid
-            const tokenExist : string = await this.usersService.findToken(token);
-            
+            const tokenExist: string = await this.usersService.findToken(token);
+
             if (!tokenExist) {
                 throw new NotFoundException('Token is invalid or has expired');
             }
 
             // find user by email
             const user = await this.usersService.findEmail(tokenExist);
-        
+
             await this.usersService.update(user.id, { emailVerified: true });
-            
+
             await this.usersService.deleteToken(token);
-            
-            res.json({
+
+            return res.json({
                 status: 'success',
                 message: 'token verified',
             });
@@ -56,7 +56,6 @@ export class AuthService {
                 message: error.message,
             });
         }
-
     }
 
     async sendCodeToEmail({ email }: { email: string }, res) {
