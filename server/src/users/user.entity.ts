@@ -28,12 +28,6 @@ export class User {
     @Column({ default: null })
     passwordChangedAt: Date;
 
-    @Column({ nullable: true })
-    token: string;
-
-    @Column({ default: null, nullable: true })
-    tokenExpires: Date;
-
     @Column({ default: false })
     emailVerified: boolean;
 

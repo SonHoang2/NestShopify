@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectRepository(User) private userRepo: Repository<User>
+        @InjectRepository(User) private userRepo: Repository<User>,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     sanitizeUser(user: User) {
         delete user.password;
-        delete user.token;
         return user;
     }
 
@@ -107,17 +109,17 @@ export class UsersService {
         }
 
         // token expires in 10 minutes
-        let tokenExpires = new Date(Date.now() + 10 * 60 * 1000);
+        await this.cacheManager.set(token, email, { ttl: 10 * 60 } as any);
 
-        Object.assign(user, { token, tokenExpires });
-        return this.userRepo.save(user);
+        return user;
     }
 
-    async findToken(token: string) {
-        return this.userRepo.createQueryBuilder('users')
-            .select("*")
-            .where('users.token = :token AND users.tokenExpires > :date', { token, date: new Date() })
-            .getRawOne();
+    
+    findToken(token: string) : Promise<string> {
+        return this.cacheManager.get(token);
     }
 
+    deleteToken(token: string) {
+        return this.cacheManager.del(token);
+    }
 }

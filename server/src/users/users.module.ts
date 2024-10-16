@@ -13,7 +13,7 @@ import { PermissionsModule } from 'src/permissions/permissions.module';
         forwardRef(() => RolesModule), // 'forwardRef' is used to resolve circular dependencies
         CommonModule,
         PermissionsModule,
-        RolesModule
+        RolesModule,
     ],
     controllers: [UsersController],
     providers: [UsersService],

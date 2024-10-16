@@ -41,7 +41,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => {    
+            useFactory: (configService: ConfigService) => {
                 return {
                     type: "postgres",
                     host: configService.get('DB_HOST'),

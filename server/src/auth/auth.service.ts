@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import * as bcrypt from 'bcrypt';
 import { JwtPayload, decode } from 'jsonwebtoken';
@@ -7,8 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from "@nestjs-modules/mailer";
 import { UsersService } from "src/users/users.service";
 import { CreateUserDto } from "src/users/dtos/create-user.dto";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Cache } from "cache-manager";
+
 
 @Injectable()
 export class AuthService {
@@ -16,7 +15,6 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private MailerService: MailerService,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     signToken(id: number): string {
@@ -24,23 +22,29 @@ export class AuthService {
     }
 
     generateRandowString(length: number) {
-        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$';
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         return Array.from(crypto.getRandomValues(new Uint32Array(length)))
             .map((x) => characters[x % characters.length])
             .join('');
     }
 
-    async verifyEmail(token: string, res) {
+    async verifyEmailCode(token: string , res) {
         try {
-            // check if token is valid
-            const user = await this.usersService.findToken(token);
 
-            if (!user) {
+            // check if token is valid
+            const tokenExist : string = await this.usersService.findToken(token);
+            
+            if (!tokenExist) {
                 throw new NotFoundException('Token is invalid or has expired');
             }
 
-            await this.usersService.update(user.id, { emailVerified: true, token: null, tokenExpires: null });
-
+            // find user by email
+            const user = await this.usersService.findEmail(tokenExist);
+        
+            await this.usersService.update(user.id, { emailVerified: true });
+            
+            await this.usersService.deleteToken(token);
+            
             res.json({
                 status: 'success',
                 message: 'token verified',
@@ -55,7 +59,7 @@ export class AuthService {
 
     }
 
-    async emailRegister({ email }: { email: string }, res) {
+    async sendCodeToEmail({ email }: { email: string }, res) {
         try {
             const token = this.generateRandowString(32);
             // save token to db
@@ -113,7 +117,6 @@ export class AuthService {
 
             // remove password and token from response
             delete newUser.password;
-            delete newUser.token;
 
             return res.json({
                 status: 'success',
@@ -134,10 +137,6 @@ export class AuthService {
 
     async login(email: string, password: string, res) {
         try {
-            await this.cacheManager.set('email', email, 1000);
-            const cachedEmail = await this.cacheManager.get('email');
-            console.log({ cachedEmail });
-
             const user = await this.usersService.findEmail(email);
 
             if (!user) {
@@ -154,7 +153,6 @@ export class AuthService {
 
             // remove password and token from response
             delete user.password;
-            delete user.token;
 
             return res.json({
                 status: 'success',
