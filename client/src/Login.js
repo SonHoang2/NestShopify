@@ -2,7 +2,7 @@ import queryString from "query-string";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const baseURL = process.env.REACT_APP_BASE_URL;
+const clientURL = process.env.REACT_APP_CLIENT_URL;
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
 export default function Login() {
@@ -17,7 +17,7 @@ export default function Login() {
             try {
                 const { code } = queryString.parse(location.search);
 
-                const URL = serverURL + `/api/v1/auth/google?code=${code}&redirectUri=${baseURL}/auth/google`;
+                const URL = serverURL + `/api/v1/auth/google?code=${code}&redirectUri=${clientURL}/auth/google`;
                 const response = await fetch(URL, {
                     method: 'POST',
                 });
@@ -37,7 +37,7 @@ export default function Login() {
         const queryParams = queryString.stringify({
             client_id: process.env.REACT_APP_CLIENT_ID, // It must correspond to what we declared earlier in the backend
             scope: "email profile", // This is the user data you have access to, in our case its just the mail.
-            redirect_uri: baseURL + "/auth/google", // This is the uri that will be redirected to if the user signs into his google account successfully
+            redirect_uri: clientURL + "/auth/google", // This is the uri that will be redirected to if the user signs into his google account successfully
             // auth_type: "rerequest", // This tells the consent screen to reappear if the user initially entered wrong credentials into the google modal
             display: "popup", //It pops up the consent screen when the anchor tag is clicked
             response_type: "code", // This tells Google to append code to the response which will be sent to the backend which exchange the code for a token
