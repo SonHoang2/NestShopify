@@ -8,7 +8,7 @@ An e-commerce website sells products directly to users, offering easy browsing, 
 
 ## Technology Using
 - Back End: NodeJS, NestJS, Typescript
-- Database: PostgreSQL
+- Database: PostgreSQL, Redis
 - Architectural Pattern: Controller-Service-Repository
 
 ## Key Features
