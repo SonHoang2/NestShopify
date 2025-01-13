@@ -1,10 +1,7 @@
-<p align="center" style="font-size: 30px">
-NestShopify
-</p>
-
-<p align="center">
+# NestShopify
+    
+## Overview
 An e-commerce website sells products directly to users, offering easy browsing, secure payments, and home delivery, making shopping convenient and accessible from any device.
-</p>
 
 ## Technology Using
 - Back End: NodeJS, NestJS, Typescript
