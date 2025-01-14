@@ -3,43 +3,39 @@
 ## Overview
 An e-commerce website sells products directly to users, offering easy browsing, secure payments, and home delivery, making shopping convenient and accessible from any device.
 
-## Technology Using
+## Technology
 - Back End: NodeJS, NestJS, Typescript
 - Database: PostgreSQL, Redis
 - Architectural Pattern: Controller-Service-Repository
 
-## Key Features
-- Authentication and Authorization:
-    - Using ACL for authorization
-    - Users can sign up, log in
-    - Users can login with social account such as google
-    - Users need to verify their email when registering to ensure they own the email address.
-- Roles
-    - The default role is admin, customer
-    - admin can get, create, delete, or change user role
-- Permissions
-    - Admin can get all, create, or delete permissions for the role
-- Categories 
-    - CRUD category 
-    - Sort banner images by position and category 
-    - Category have status active or inactive
-- Items
-    - CRUD Items
-    - Item include name, barcode, purchase price, sale price, weight, thumbnail image, description, quantity, category
-    - Item can have many images
-    - decrease the number of items in stock when the user purchases success
-- Orders
-    - CRUD orders
-    - Can see report sales orders by month and year
-- Vouchers
-    - Can be used for orders
-    - Have limited by time and quantity
-- FlashSale
-    - Manage time for flash sale
-    - Manage price items during flash sale time
-    - Can see how many items are in flash sale
-- Notification
-    - An email will be sent to users 15 minutes before the flash sale starts.
+
+## Features
+- **User Authentication and Authorization:**
+Provides secure functionality for user registration, login, and email verification. Supports Google-based social login and implements ACL-based access control for managing user permissions effectively.
+
+- **Role Management:**
+Facilitates role-based access with predefined roles like admin and customer. Admins can create, update, delete roles, and assign them to specific users for better control.
+
+- **Permission Management:**
+Admins have the ability to create, view, and delete permissions. These permissions are assigned to roles to define and manage access levels clearly.
+
+- **Category Management:**
+Allows admins to perform CRUD operations for categories and organize banner images by position and category. Categories can also be activated or deactivated based on their status.
+
+- **Item Management:**
+Enables CRUD operations for items with detailed attributes such as name, barcode, price, weight, quantity, description, thumbnail, and multiple images. Automatically updates stock quantities after successful purchases to ensure accuracy.
+
+- **Order Management:**
+Provides full CRUD operations for managing orders efficiently. Also includes monthly and yearly sales reporting to track business performance.
+
+- **Voucher Management:**
+Offers promotional discounts that users can apply to their orders within a specified time frame. Each voucher is limited by time and quantity, requiring timely redemption before they expire or run out.
+
+- **Flash Sale Management:**
+Handles flash sale timing, pricing, and the availability of items during these events. Ensures seamless management of limited-time promotions to boost sales.
+
+- **Notification System:**
+Sends automated email notifications to users 15 minutes before a flash sale begins. Keeps users informed and engaged with timely updates.
 
 
 ## Database Design
@@ -90,7 +86,7 @@ IMGBB_API_KEY=
 CLUSTER_MODE=true|false
 
 ```
-## About the Author
+## Author
 
 Hi, I'm the creator and maintainer of this project. I'm passionate about software development and always eager to improve. If you find this project helpful, please consider giving it a star ⭐ – your support means a lot!  
 
